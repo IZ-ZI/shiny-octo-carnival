@@ -1,6 +1,25 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#alert {
+  width: 100%;
+  position: absolute;
+  pointer-events: true;
+  z-index: 1;
+}
+
+#insert {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
