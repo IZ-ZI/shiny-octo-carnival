@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
-  entry: './src/js/index.js',
+  entry: './src/containers/index.js',
   devtool: 'inline-source-map',
   target: 'electron-renderer',
   module: {
@@ -33,6 +33,13 @@ module.exports = {
           // Compiles Sass to CSS
           'sass-loader',
         ],
+      },
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        loader: 'file-loader',
+        options: {
+          name: '/public/icons/[name].[ext]'
+        }
       }
     ]
   },

@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -9,15 +9,25 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    show: false,
+    width: 1500,
+    height: 900,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: false,
+      preload: __dirname + '/preload.js'
+    }
   });
 
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
+  // mainWindow.removeMenu();
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  })
 };
 
 // This method will be called when Electron has finished
@@ -40,6 +50,18 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+ipcMain.on('remember-true', (event, arg) => {
+  const options = {
+    type: 'info',
+    buttons: ['OK'],
+    defaultId: 1,
+    title: 'Info',
+    message: 'Received Log In Attempt',
+    detail: arg.toString(),
+  };
+  dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), options);
 });
 
 // In this file you can include the rest of your app's specific main process
