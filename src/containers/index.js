@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import Landing from '../components/Landing'
+import Landing from './Landing'
 
 particlesJS("particles-js", {
     "particles": {
