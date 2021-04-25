@@ -18,6 +18,7 @@ class Register extends React.Component {
     onFinish = e => {
         if (e.agreement === true) {
             console.log(e);
+            this.props.history.push('/register/success');
         } else {
             Modal.warning({ title: 'Attention', content: 'You must agree to the Terms and Conditions.', centered: true });
         }

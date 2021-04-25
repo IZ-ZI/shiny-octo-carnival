@@ -2,14 +2,14 @@ import React from 'react';
 import reqwest from 'reqwest';
 
 import "antd/dist/antd.css";
-import { Avatar, BackTop, Button, Skeleton, List } from 'antd';
+import { Avatar, Button, Skeleton, List } from 'antd';
 
 const numOfItems = 10;
 const mockURI = `https://randomuser.me/api/?results=${numOfItems}&inc=name,gender,email,location,picture`;
 
 class LoadMoreContent extends React.Component {
   state = {
-    initLoadingLoading: true,
+    initLoading: true,
     loading: false,
     data: [],
     list: [],
