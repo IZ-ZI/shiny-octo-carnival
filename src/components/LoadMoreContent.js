@@ -1,8 +1,8 @@
-import React from 'react';
-import reqwest from 'reqwest';
+import React from "react";
+import reqwest from "reqwest";
 
 import "antd/dist/antd.css";
-import { Avatar, Button, Skeleton, List } from 'antd';
+import { Avatar, Button, Skeleton, List } from "antd";
 
 const numOfItems = 10;
 const mockURI = `https://randomuser.me/api/?results=${numOfItems}&inc=name,gender,email,location,picture`;
@@ -17,11 +17,11 @@ class LoadMoreContent extends React.Component {
 
   componentDidMount() {
     reqwest({
-      url: 'https://randomuser.me/api/?results=1&inc=name,gender,email,location,picture',
-      type: 'json',
-      method: 'get',
-      contentType: 'application/json',
-      success: res => {
+      url: mockURI,
+      type: "json",
+      method: "get",
+      contentType: "application/json",
+      success: (res) => {
         this.setState({
           initLoading: false,
           data: res.results,
@@ -31,13 +31,13 @@ class LoadMoreContent extends React.Component {
     });
   }
 
-  getData = callback => {
+  getData = (callback) => {
     reqwest({
       url: mockURI,
-      type: 'json',
-      method: 'get',
-      contentType: 'application/json',
-      success: res => {
+      type: "json",
+      method: "get",
+      contentType: "application/json",
+      success: (res) => {
         callback(res);
       },
     });
@@ -46,9 +46,11 @@ class LoadMoreContent extends React.Component {
   onLoadMore = () => {
     this.setState({
       loading: true,
-      list: this.state.data.concat([...new Array(numOfItems)].map(() => ({ loading: true, name: {} }))),
+      list: this.state.data.concat(
+        [...new Array(numOfItems)].map(() => ({ loading: true, name: {} }))
+      ),
     });
-    this.getData(res => {
+    this.getData((res) => {
       const data = this.state.data.concat(res.results);
       this.setState(
         {
@@ -57,13 +59,10 @@ class LoadMoreContent extends React.Component {
           loading: false,
         },
         () => {
-          // Resetting window's offsetTop so as to display react-virtualized demo underfloor.
-          // In real scene, you can using public method of react-virtualized:
-          // https://stackoverflow.com/questions/46700726/how-to-use-public-method-updateposition-of-react-virtualized
-          window.dispatchEvent(new Event('resize'));
+          window.dispatchEvent(new Event("resize"));
           var objDiv = document.getElementById("bottom");
           objDiv.scrollIntoView({ behavior: "smooth" });
-        },
+        }
       );
     });
   };
@@ -74,11 +73,11 @@ class LoadMoreContent extends React.Component {
       !initLoading && !loading ? (
         <div
           style={{
-            textAlign: 'center',
+            textAlign: "center",
             marginTop: 12,
             marginBottom: 42,
             height: 32,
-            lineHeight: '32px',
+            lineHeight: "32px",
           }}
         >
           <Button onClick={this.onLoadMore}>Fetch Content</Button>
@@ -91,15 +90,35 @@ class LoadMoreContent extends React.Component {
         itemLayout="vertical"
         loadMore={loadMore}
         dataSource={list}
-        renderItem={item => (
+        renderItem={(item) => (
           <List.Item>
             <Skeleton avatar title={true} loading={item.loading} active>
               <List.Item.Meta
-                avatar={<Avatar src={item.picture === undefined ? '' : `${item.picture.thumbnail}`} />}
-                title={<a href="https://github.com/IZ-ZI/shiny-octo-carnival">{item.name.first + ' ' + item.name.last}</a>}
+                avatar={
+                  <Avatar
+                    src={
+                      item.picture === undefined
+                        ? ""
+                        : `${item.picture.thumbnail}`
+                    }
+                  />
+                }
+                title={
+                  <a href="https://github.com/IZ-ZI/shiny-octo-carnival">
+                    {item.name.first + " " + item.name.last}
+                  </a>
+                }
                 description={item.email}
               />
-              {(item.gender === 'female' ? 'She' : 'He') + ' is living at ' + (item.location === undefined ? '' : (item.location.street.number + ' ' + item.location.street.name + ', ' + item.location.country))}
+              {(item.gender === "female" ? "She" : "He") +
+                " is living at " +
+                (item.location === undefined
+                  ? ""
+                  : item.location.street.number +
+                    " " +
+                    item.location.street.name +
+                    ", " +
+                    item.location.country)}
             </Skeleton>
           </List.Item>
         )}

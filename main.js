@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { screen, app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -9,11 +9,12 @@ if (require("electron-squirrel-startup")) {
 
 const createWindow = () => {
   // Create the browser window.
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const mainWindow = new BrowserWindow({
     show: false,
     opacity: 0,
-    width: 1500,
-    height: 900,
+    width: parseInt(width * 0.7),
+    height: parseInt(height * 0.75),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
