@@ -6,6 +6,24 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import logo_src from "../imgs/argus-logo-small.png";
 
 class Login extends React.Component {
+  //signInTimeout;
+
+  state = {
+    signInLoading: false,
+  };
+
+  //onFinish = (e) => {
+  //this.setState({ signInLoading: true });
+  //this.signInTimeout = setTimeout(() => {
+  //this.setState({ signInLoading: false });
+  //console.log(e);
+  //}, 3000);
+  //};
+
+  //componentWillUnmount() {
+  //clearTimeout(this.signInTimeout);
+  //}
+
   onFinish = (e) => {
     if (e.remember === true) {
       window.api.send("save-login", [e.username, e.password]);
@@ -98,6 +116,7 @@ class Login extends React.Component {
                 type="primary"
                 htmlType="submit"
                 className="login-form-button"
+                loading={this.state.signInLoading}
               >
                 Sign in
               </Button>
@@ -121,4 +140,3 @@ class Login extends React.Component {
   }
 }
 export default Login;
-

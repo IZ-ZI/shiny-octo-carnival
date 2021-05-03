@@ -17,8 +17,7 @@ const pwdHint = (
 class Register extends React.Component {
   onFinish = (e) => {
     if (e.agreement === true) {
-      console.log(e);
-      this.props.history.push("/register/success");
+      window.api.send("try-register", e);
     } else {
       Modal.warning({
         title: "Attention",

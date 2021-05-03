@@ -1,5 +1,5 @@
 import React from "react";
-import moment from "moment";
+import { format } from "date-fns";
 import {
   Row,
   Col,
@@ -7,10 +7,12 @@ import {
   Card,
   Tooltip,
   Divider,
+  message,
+  Skeleton,
   Statistic,
   PageHeader,
-  Skeleton,
 } from "antd";
+
 import {
   ClockCircleOutlined,
   CopyOutlined,
@@ -18,6 +20,7 @@ import {
   UserOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
+
 import reqwest from "reqwest";
 import Dashboard_SevenDayGraph from "./DashboardComponents/Dashboard_SevenDayGraph";
 
@@ -27,10 +30,14 @@ class Dashboard extends React.Component {
     this.networkHandler = this.networkHandler.bind(this);
   }
 
+  intervalID = 0;
+  avatarReq;
+  graphReq;
+
   state = {
     loading: true,
     graphData: [],
-    network: "online",
+    network: navigator.onLine ? "online" : "offline",
     tReport: "Loading...",
     tMeeting: "Loading...",
     wMeeting: "Loading...",
@@ -39,18 +46,25 @@ class Dashboard extends React.Component {
   };
 
   updateTime() {
-    setInterval(() => {
-      this.setState({ timeStamp: moment().format("MMMM Do YYYY, h:mm:ss a") });
+    this.intervalID = setInterval(() => {
+      this.setState({
+        timeStamp: format(new Date(), "PPpp"),
+      });
     }, 1000);
   }
 
   getGraphData() {
-    reqwest({
+    this.graphReq = reqwest({
       url: "https://my.api.mockaroo.com/dash_meetings.json.json?key=55a70d70",
       type: "json",
       method: "get",
       success: (res) => {
         this.setState({ graphData: res, loading: false });
+      },
+      error: () => {
+        setTimeout(function () {
+          message.error("Something went wrong.");
+        }, 1000);
       },
     });
   }
@@ -73,7 +87,7 @@ class Dashboard extends React.Component {
     this.updateTime();
     this.getGraphData();
     this.bindInternetListeners();
-    reqwest({
+    this.avatarReq = reqwest({
       url: "https://randomuser.me/api/?result=1&inc=picture",
       type: "json",
       method: "get",
@@ -87,6 +101,9 @@ class Dashboard extends React.Component {
   }
 
   componentWillUnmount() {
+    this.avatarReq.abort();
+    this.graphReq.abort();
+    clearInterval(this.intervalID);
     this.releaseInternetListeners();
   }
 
