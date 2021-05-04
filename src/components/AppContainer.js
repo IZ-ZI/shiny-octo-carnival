@@ -1,14 +1,13 @@
 import React from "react";
-import Report from "./Reports";
+import Report from "./Report";
 import Profile from "./Profile";
 import Meeting from "./Meeting";
 import Dashboard from "./Dashboard";
-import LoadMoreContent from "./LoadMoreContent";
 
 import logo_src from "../imgs/argus-logo-small.png";
 
 import "antd/dist/antd.css";
-import { Affix, notification, Layout, Menu } from "antd";
+import { notification, Layout, Menu } from "antd";
 import { Redirect, Route, Switch } from "react-router-dom";
 import {
   UserOutlined,
@@ -95,7 +94,7 @@ class AppContainer extends React.Component {
               id="sider-bar-container"
               mode="inline"
               theme="dark"
-              defaultSelectedKeys={["2"]}
+              defaultSelectedKeys={["3"]}
               style={{
                 paddingTop: "40px",
                 height: "100%",
@@ -155,7 +154,7 @@ class AppContainer extends React.Component {
           </Sider>
           <Layout>
             <Content className="scroll-container">
-              <Redirect from="/appcontainer" to="/appcontainer/dashboard" />
+              <Redirect from="/appcontainer" to="/appcontainer/meeting" />
               <Switch>
                 <Route path="/appcontainer/dashboard" component={Dashboard} />
                 <Route path="/appcontainer/meeting" component={Meeting} />

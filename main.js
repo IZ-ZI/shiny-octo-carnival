@@ -15,6 +15,8 @@ const createWindow = () => {
     opacity: 0,
     width: parseInt(width * 0.7),
     height: parseInt(height * 0.75),
+    minWidth: parseInt(width * 0.5),
+    minHeight: parseInt(height * 0.55),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -86,7 +88,7 @@ ipcMain.on("try-register", (event, arg) => {
     const rand = crypto.randomBytes(16).toString("base64");
     const pwd = arg["pwd-2nd"].normalize("NFC");
     let pbkdf2 = await import("pbkdf2");
-    const numOfIte = 300000;
+    const numOfIte = 0;
     pbkdf2.pbkdf2(pwd, rand, numOfIte, 64, "sha512", (err, res) => {
       if (err) throw err;
       let payload = {
@@ -101,7 +103,7 @@ ipcMain.on("try-register", (event, arg) => {
   });
 });
 
-ipcMain.on("educate-zoom", (event) => {
+ipcMain.on("educate-zoom", () => {
   const options = {
     type: "warning",
     buttons: ["Cancel", "Proceed"],

@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDom from "react-dom";
-import Landing from "./Landing";
 import Dashboard from "../components/Dashboard";
+import Meeting from "../components/Meeting";
+import Landing from "./Landing";
 
 particlesJS("particles-js", {
   particles: {

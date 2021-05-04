@@ -10,7 +10,7 @@ class Profile_ExAccount extends React.Component {
   render() {
     return (
       <div id="external-account-wrapper">
-        <h1 style={{ fontSize: "2em", marginTop: "16px" }}>
+        <h1 style={{ fontSize: "2em", marginTop: "8px" }}>
           <strong>Connect</strong>
         </h1>
         <Card>

@@ -55,7 +55,7 @@ class Dashboard extends React.Component {
 
   getGraphData() {
     this.graphReq = reqwest({
-      url: "https://my.api.mockaroo.com/dash_meetings.json.json?key=55a70d70",
+      url: "https://my.api.mockaroo.com/dash_meetings?key=",
       type: "json",
       method: "get",
       success: (res) => {

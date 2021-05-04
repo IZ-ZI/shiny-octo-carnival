@@ -38,14 +38,15 @@ class Login extends React.Component {
           <Form
             name="login_form"
             className="login_form"
-            initialValues={{ remember: false }}
             onFinish={this.onFinish}
+            initialValues={{ remember: false }}
           >
             <Form.Item style={{ marginBottom: "9px", marginTop: "1px" }}>
               <img
-                src={logo_src}
                 width="102px"
+                src={logo_src}
                 draggable="false"
+                className="no-select"
                 style={{
                   display: "block",
                   marginLeft: "auto",

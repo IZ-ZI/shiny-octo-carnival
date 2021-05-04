@@ -42,7 +42,7 @@ class Profile_Overview extends React.Component {
   render() {
     return (
       <div id="overview-wrapper">
-        <h1 style={{ fontSize: "2em", marginTop: "16px" }}>
+        <h1 style={{ fontSize: "2em", marginTop: "8px" }}>
           <strong>Info</strong>
         </h1>
         <Card>

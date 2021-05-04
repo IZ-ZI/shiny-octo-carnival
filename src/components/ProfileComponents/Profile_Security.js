@@ -29,7 +29,7 @@ class Profile_Security extends React.Component {
   render() {
     return (
       <div id="security-wrapper">
-        <h1 style={{ marginTop: "16px", fontSize: "2em" }}>
+        <h1 style={{ marginTop: "8px", fontSize: "2em" }}>
           <strong>Login & Security</strong>
         </h1>
         <Card>
