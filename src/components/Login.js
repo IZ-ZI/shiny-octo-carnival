@@ -1,35 +1,51 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import "antd/dist/antd.css";
-import { Form, Input, Button, Checkbox } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import reqwest from "reqwest";
+import { Link } from "react-router-dom";
 import logo_src from "../imgs/argus-logo-small.png";
+import { Form, Input, Button, Checkbox, message } from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 class Login extends React.Component {
-  //signInTimeout;
+  loginReq;
 
   state = {
     signInLoading: false,
   };
 
-  //onFinish = (e) => {
-  //this.setState({ signInLoading: true });
-  //this.signInTimeout = setTimeout(() => {
-  //this.setState({ signInLoading: false });
-  //console.log(e);
-  //}, 3000);
-  //};
-
-  //componentWillUnmount() {
-  //clearTimeout(this.signInTimeout);
-  //}
+  componentDidMount() {
+    setTimeout(() => window.dispatchEvent(new Event("resize")), 1);
+  }
 
   onFinish = (e) => {
+    this.setState({ signInLoading: true });
     if (e.remember === true) {
       window.api.send("save-login", [e.username, e.password]);
     }
-    this.props.history.push("/appcontainer");
+    this.loginReq = reqwest({
+      url: "https://18.221.119.146:8000/oum/argusUtils/login/",
+      method: "post",
+      type: "json",
+      contentType: "application/json",
+      data: JSON.stringify(e),
+      success: (res) => {
+        this.setState({ signInLoading: false });
+        sessionStorage.setItem("sessionKey", res.output["X-API-SESSION"]);
+        this.props.history.push("/appcontainer");
+      },
+      error: () => {
+        this.setState({ signInLoading: false });
+        this.props.history.push("/appcontainer");
+        message.error("Login failed. Please check you credentials.", 3);
+      },
+    });
   };
+
+  componentWillUnmount() {
+    if (this.loginReq) {
+      this.loginReq.abort();
+    }
+  }
 
   render() {
     return (

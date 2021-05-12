@@ -1,5 +1,12 @@
-const { screen, app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
+const {
+  screen,
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  net,
+} = require("electron");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -53,7 +60,7 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", createWindow);
-
+app.commandLine.appendSwitch("ignore-certificate-errors", "true");
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
@@ -83,26 +90,6 @@ ipcMain.on("save-login", (event, arg) => {
   dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), options);
 });
 
-ipcMain.on("try-register", (event, arg) => {
-  import("crypto").then(async (crypto) => {
-    const rand = crypto.randomBytes(16).toString("base64");
-    const pwd = arg["pwd-2nd"].normalize("NFC");
-    let pbkdf2 = await import("pbkdf2");
-    const numOfIte = 0;
-    pbkdf2.pbkdf2(pwd, rand, numOfIte, 64, "sha512", (err, res) => {
-      if (err) throw err;
-      let payload = {
-        email: arg["email"],
-        username: arg["username"],
-        salt: rand,
-        hash: res.toString("base64"),
-        iteration: numOfIte,
-      };
-      console.log(payload);
-    });
-  });
-});
-
 ipcMain.on("educate-zoom", () => {
   const options = {
     type: "warning",
@@ -121,4 +108,50 @@ ipcMain.on("educate-zoom", () => {
       "https://marketplace.zoom.us/docs/guides/auth/oauth"
     );
   }
+});
+
+ipcMain.on("connect-zoom", (event, payload) => {
+  const oauthURL =
+    "https://zoom.us/oauth/authorize?response_type=code&client_id=ZkN5imdcTRaz0LJJ1dtMhw&redirect_uri=https://18.221.119.146:8000/oum/argusUtils/setup/redirected";
+
+  const sizes = BrowserWindow.getFocusedWindow().getSize();
+  var authWindow = new BrowserWindow({
+    modal: true,
+    show: false,
+    width: parseInt(sizes[0] * 0.6),
+    height: parseInt(sizes[1] * 0.6),
+    parent: BrowserWindow.getFocusedWindow(),
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
+    },
+  });
+
+  authWindow.removeMenu();
+  authWindow.loadURL(oauthURL);
+  authWindow.show();
+  authWindow.webContents.on("will-navigate", function (event, newUrl) {
+    let re = /code=(.*)/;
+    let code = newUrl.toString().match(re);
+    if (code) {
+      const req = net.request({
+        method: "GET",
+        url:
+          "https://18.221.119.146:8000/oum/argusUtils/zoomlinker?code=" +
+          code[1],
+      });
+      req.setHeader("X-API-SESSION", payload);
+      req.end();
+      authWindow.close();
+    }
+  });
+
+  authWindow.on("closed", function () {
+    authWindow = null;
+  });
+});
+
+ipcMain.on("should-update-meeting", (event, payload) => {
+  BrowserWindow.getFocusedWindow().webContents.send("update-meeting-now");
 });

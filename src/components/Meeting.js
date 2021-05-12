@@ -5,15 +5,27 @@ import {
   CloseCircleOutlined,
 } from "@ant-design/icons";
 import React from "react";
+import reqwest from "reqwest";
 import MeetingList from "./MeetingComponents/MeetingList";
+import CreateMeeting from "./MeetingComponents/CreateMeeting";
+
+const URL =
+  "https://18.221.119.146:8000/ppm/managedClient/account/meetingscheduler/";
 
 export default class Meeting extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleCancel = this.handleCancel.bind(this);
+  }
+
   state = {
+    modalVisible: false,
     zoomConnected: true,
-    loadingMeetins: true,
   };
 
-  componentDidMount() {}
+  handleCancel() {
+    this.setState({ modalVisible: false });
+  }
 
   render() {
     return (
@@ -58,11 +70,18 @@ export default class Meeting extends React.Component {
             type="dashed"
             style={{ width: "100%" }}
             icon={<AppstoreAddOutlined />}
+            onClick={() => {
+              this.setState({ modalVisible: true });
+            }}
           >
             New Meeting
           </Button>
           <MeetingList />
         </Card>
+        <CreateMeeting
+          isVisible={this.state.modalVisible}
+          handleCancel={() => this.handleCancel}
+        />
       </div>
     );
   }

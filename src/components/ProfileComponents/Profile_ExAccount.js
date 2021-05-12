@@ -4,9 +4,12 @@ import { withRouter } from "react-router";
 
 class Profile_ExAccount extends React.Component {
   educateThePeople() {
-    window.api.send("educate-zoom", "hello ipcMain :)");
+    window.api.send("educate-zoom", "");
   }
 
+  connectToZoom() {
+    window.api.send("connect-zoom", sessionStorage.getItem("sessionKey"));
+  }
   render() {
     return (
       <div id="external-account-wrapper">
@@ -27,6 +30,9 @@ class Profile_ExAccount extends React.Component {
               danger={true}
               size="large"
               style={{ width: "180px" }}
+              onClick={() => {
+                this.connectToZoom();
+              }}
             >
               Connect to Zoom
             </Button>

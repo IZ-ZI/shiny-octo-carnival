@@ -1,10 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import "antd/dist/antd.css";
-import { Form, Input, Popover, Button, Checkbox, Modal } from "antd";
-import { UserOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
+import reqwest from "reqwest";
+import { Link } from "react-router-dom";
 import logo_src from "../imgs/argus-logo-small.png";
 import { PasswordInput } from "antd-password-input-strength";
+import { Form, Input, Popover, Button, Checkbox, Modal } from "antd";
+import { UserOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
 const pwdHint = (
   <div>
     <p>- At least one upper-cased letter.</p>
@@ -15,9 +16,30 @@ const pwdHint = (
 );
 
 class Register extends React.Component {
+  state = { loading: false };
+  registerReq;
+
   onFinish = (e) => {
     if (e.agreement === true) {
-      window.api.send("try-register", e);
+      this.setState({ loading: true });
+      let payload = {
+        email: e["email"],
+        username: e["username"],
+        password: e["pwd-2nd"],
+      };
+      this.registerReq = reqwest({
+        url: "https://18.221.119.146:8000/oum/argusUtils/signup/",
+        method: "put",
+        type: "json",
+        contentType: "application/json",
+        data: JSON.stringify(payload),
+        success: () => {
+          this.props.history.push("/register/success");
+        },
+        error: () => {
+          this.props.history.push("/register/failed");
+        },
+      });
     } else {
       Modal.warning({
         title: "Attention",
@@ -26,6 +48,12 @@ class Register extends React.Component {
       });
     }
   };
+
+  componentWillUnmount() {
+    if (this.registerReq) {
+      this.registerReq.abort();
+    }
+  }
 
   render() {
     return (
@@ -176,6 +204,7 @@ class Register extends React.Component {
                 }}
                 type="primary"
                 htmlType="submit"
+                loading={this.state.loading}
                 className="login-form-button"
               >
                 Register Free Account

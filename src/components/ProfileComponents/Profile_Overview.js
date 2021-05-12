@@ -1,23 +1,73 @@
 import React from "react";
 import Avatar from "antd/lib/avatar/avatar";
 import { withRouter } from "react-router-dom";
-import { Form, Input, Modal, Button, Card, Divider } from "antd";
+import { Form, Input, Modal, Button, Card, message } from "antd";
 import {
   UserOutlined,
   MailOutlined,
-  PoweroffOutlined,
   UndoOutlined,
+  SmileOutlined,
+  PhoneOutlined,
+  PoweroffOutlined,
 } from "@ant-design/icons";
-
+import reqwest from "reqwest";
 import logo_src from "../../imgs/test_cat.jpg";
 
 class Profile_Overview extends React.Component {
+  formRef = React.createRef();
+  state = {
+    refreshing: false,
+    profileData: {
+      username: "loading...",
+      email: "loading...",
+      firstName: "loading...",
+      lastName: "loading...",
+      phone: "loading...",
+    },
+  };
+
+  profileReq;
+  requestProfile() {
+    this.setState({ refreshing: true });
+    this.profileReq = reqwest({
+      url: "https://18.221.119.146:8000/ppm/managedClient/account/argus/",
+      type: "json",
+      method: "get",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+      success: (res) => {
+        this.setState({ profileData: res.output });
+        this.formRef.current.setFieldsValue({
+          username: this.state.profileData["username"],
+          email: this.state.profileData["email"],
+          name:
+            this.state.profileData["firstName"] +
+            " " +
+            this.state.profileData["lastName"],
+          phone: this.state.profileData["phone"],
+        });
+        this.setState({ refreshing: false });
+      },
+      error: () => {
+        message.error("Something went wrong.");
+        this.setState({ refreshing: false });
+      },
+    });
+  }
+
+  componentDidMount() {
+    this.requestProfile();
+  }
+
   changeAvatar() {
     alert("change avatar");
   }
 
   refreshProfile() {
-    alert("refresh profile");
+    this.requestProfile();
+  }
+
+  componentWillUnmount() {
+    this.profileReq.abort();
   }
 
   tryLogout() {
@@ -35,6 +85,7 @@ class Profile_Overview extends React.Component {
   }
 
   confirmLogout() {
+    sessionStorage.clear();
     this.props.history.push("/login");
     document.getElementById("particles-js").style.display = "inline";
   }
@@ -71,10 +122,13 @@ class Profile_Overview extends React.Component {
           </div>
           <div id="overview-info">
             <Form
+              ref={this.formRef}
               style={{ marginTop: "16px" }}
               initialValues={{
-                username: ["username GET"],
-                email: ["User email. Retrieved with GET"],
+                username: this.state.profileData["username"],
+                email: this.state.profileData["email"],
+                name: this.state.profileData["firstName"],
+                phone: this.state.profileData["phone"],
               }}
             >
               <span style={{ display: "inline-block", width: "90%" }}>
@@ -87,7 +141,6 @@ class Profile_Overview extends React.Component {
                   prefix={<UserOutlined className="site-form-item-icon" />}
                 />
               </Form.Item>
-              <Divider />
               <span style={{ display: "inline-block", width: "90%" }}>
                 <strong>Email</strong>
               </span>
@@ -98,34 +151,32 @@ class Profile_Overview extends React.Component {
                   prefix={<MailOutlined className="site-form-item-icon" />}
                 />
               </Form.Item>
-              <Divider />
-              <span style={{ display: "inline-block", width: "44.5%" }}>
-                <strong>First Name</strong>
+              <span style={{ display: "inline-block", width: "90%" }}>
+                <strong>Name</strong>
               </span>
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "44.5%",
-                  marginLeft: "1%",
-                }}
-              >
-                <strong>Last Name</strong>
-              </span>
-              <Form.Item name="firstNlast_name">
-                <Input.Group>
-                  <Input
-                    style={{ height: "40px", width: "44.5%" }}
-                    defaultValue="first name GET"
-                    disabled
-                  />
-                  <Input
-                    style={{ height: "40px", width: "44.5%", marginLeft: "1%" }}
-                    defaultValue="last name GET"
-                    disabled
-                  />
-                </Input.Group>
+              <Form.Item name="name">
+                <Input
+                  style={{
+                    height: "40px",
+                    width: "90%",
+                  }}
+                  disabled
+                  prefix={<SmileOutlined className="site-form-item-icon" />}
+                />
               </Form.Item>
-              <Divider />
+              <span style={{ display: "inline-block", width: "90%" }}>
+                <strong>Phone Number</strong>
+              </span>
+              <Form.Item name="phone">
+                <Input
+                  style={{
+                    height: "40px",
+                    width: "90%",
+                  }}
+                  disabled
+                  prefix={<PhoneOutlined className="site-form-item-icon" />}
+                />
+              </Form.Item>
               <div id="overview-button-wrapper">
                 <Button
                   onClick={() => {
@@ -141,6 +192,7 @@ class Profile_Overview extends React.Component {
                   onClick={() => {
                     this.refreshProfile();
                   }}
+                  loading={this.state.refreshing}
                   type="default"
                   icon={
                     <UndoOutlined style={{ transform: "rotate(135deg)" }} />

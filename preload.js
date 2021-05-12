@@ -5,15 +5,16 @@ contextBridge.exposeInMainWorld("api", {
     let whiteListEvents = [
       "save-login",
       "try-login",
-      "try-register",
       "educate-zoom",
+      "connect-zoom",
+      "should-update-meeting",
     ];
     if (whiteListEvents.includes(event)) {
       ipcRenderer.send(event, payload);
     }
   },
   receive: (event, func) => {
-    let whiteListEvents = ["default-e"];
+    let whiteListEvents = ["update-meeting-now"];
     if (whiteListEvents.includes(event)) {
       ipcRenderer.on(event, (e, ...args) => func(...args));
     }

@@ -1,29 +1,234 @@
-import { Button, Card, Divider } from "antd";
+import { Button, Card, Divider, Modal, Form, Input, message } from "antd";
 import React from "react";
 import { withRouter } from "react-router";
+import reqwest from "reqwest";
 
 class Profile_Security extends React.Component {
-  mockData = {
-    name: "mock user name",
-    password: "*********",
-    email: "email@example.com",
-    mobileNum: "123-456-7890",
+  state = {
+    details: {
+      firstName: "loading...",
+      lastName: "",
+      name: "loading...",
+      email: "loading...",
+      phone: "loading...",
+    },
+  };
+
+  securityReq;
+  requestProfile() {
+    this.securityReq = reqwest({
+      url: "https://18.221.119.146:8000/ppm/managedClient/account/argus/",
+      type: "json",
+      method: "get",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+      success: (res) => {
+        this.setState({ details: res.output });
+      },
+      error: () => {
+        message.error("Something went wrong.");
+      },
+    });
+  }
+
+  componentDidMount() {
+    this.requestProfile();
+  }
+
+  componentWillUnmount() {
+    this.securityReq.abort();
+    if (this.nameRef) {
+      this.nameRef.abort();
+    }
+    if (this.emailRef) {
+      this.emailRef.abort();
+    }
+    if (this.pwdRef) {
+      this.pwdRef.abort();
+    }
+    if (this.phoneReq) {
+      this.phoneReq.abort();
+    }
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  nameRef;
+  toUpdateName = (e) => {
+    if (e["firstName"] !== "" || e["lastName"] !== "") {
+      this.phoneReq = reqwest({
+        url:
+          "https://18.221.119.146:8000/ppm/managedClient/account/profile/name/",
+        type: "json",
+        method: "post",
+        data: JSON.stringify(e),
+        headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+        success: () => {
+          message.success("Successfully updated name");
+        },
+        error: () => {
+          message.error("An error occurred");
+        },
+      });
+    }
   };
 
   modifyName() {
-    alert("modify name");
+    let nameForm = React.createRef();
+    Modal.info({
+      className: "no-select",
+      title: "Update Name",
+      centered: true,
+      content: (
+        <>
+          <Divider />
+          <Form ref={nameForm} onFinish={this.toUpdateName}>
+            <Form.Item name="firstName">
+              <Input placeholder="first name" />
+            </Form.Item>
+            <Form.Item name="lastName">
+              <Input placeholder="last name" />
+            </Form.Item>
+          </Form>
+        </>
+      ),
+      onOk() {
+        nameForm.current.submit();
+      },
+    });
   }
+
+  emailRef;
+  toUpdateEmail = (e) => {
+    if (e["email"] !== "") {
+      this.phoneReq = reqwest({
+        url:
+          "https://18.221.119.146:8000/ppm/managedClient/account/profile/email/",
+        type: "json",
+        method: "post",
+        data: JSON.stringify(e),
+        headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+        success: () => {
+          message.success("Successfully updated Email");
+        },
+        error: () => {
+          message.error("An error occurred");
+        },
+      });
+    }
+  };
 
   modifyEmail() {
-    alert("modify email");
+    let emailForm = React.createRef();
+    Modal.info({
+      className: "no-select",
+      title: "Update Email",
+      centered: true,
+      content: (
+        <>
+          <Divider />
+          <Form ref={emailForm} onFinish={this.toUpdateEmail}>
+            <Form.Item name="email">
+              <Input placeholder="email" />
+            </Form.Item>
+          </Form>
+        </>
+      ),
+      onOk() {
+        emailForm.current.submit();
+      },
+    });
   }
+
+  forceLogout() {
+    sessionStorage.clear();
+    this.props.history.push("/login");
+    document.getElementById("particles-js").style.display = "inline";
+  }
+
+  pwdRef;
+  toUpdatePassword = (e) => {
+    if (e["password"] !== "") {
+      this.pwdRef = reqwest({
+        url:
+          "https://18.221.119.146:8000/ppm/managedClient/account/profile/password/",
+        type: "json",
+        method: "post",
+        data: JSON.stringify(e),
+        headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+        success: () => {
+          message.success(
+            "Successfully updated password, you will be logged out in 3 seconds"
+          );
+          setTimeout(() => this.forceLogout(), 3000);
+        },
+        error: () => {
+          message.error("An error occurred");
+        },
+      });
+    }
+  };
 
   modifyPassword() {
-    alert("modify password");
+    let pwdForm = React.createRef();
+    Modal.info({
+      className: "no-select",
+      title: "Update Password",
+      centered: true,
+      content: (
+        <>
+          <Divider />
+          <Form ref={pwdForm} onFinish={this.toUpdatePassword}>
+            <Form.Item name="password">
+              <Input placeholder="password" />
+            </Form.Item>
+          </Form>
+        </>
+      ),
+      onOk() {
+        pwdForm.current.submit();
+      },
+    });
   }
 
+  phoneReq;
+  toUpdatePhone = (e) => {
+    if (e["phone"] !== "") {
+      this.phoneReq = reqwest({
+        url:
+          "https://18.221.119.146:8000/ppm/managedClient/account/profile/phone/",
+        type: "json",
+        method: "post",
+        data: JSON.stringify(e),
+        headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+        success: () => {
+          message.success("Successfully updated phone");
+        },
+        error: () => {
+          message.error("An error occurred");
+        },
+      });
+    }
+  };
+
   modifyPhone() {
-    alert("modify phone number");
+    let phoneForm = React.createRef();
+    Modal.info({
+      className: "no-select",
+      title: "Update Phone Number",
+      centered: true,
+      content: (
+        <>
+          <Divider />
+          <Form ref={phoneForm} onFinish={this.toUpdatePhone}>
+            <Form.Item name="phone">
+              <Input placeholder="phone number" />
+            </Form.Item>
+          </Form>
+        </>
+      ),
+      onOk() {
+        phoneForm.current.submit();
+      },
+    });
   }
 
   render() {
@@ -46,7 +251,14 @@ class Profile_Security extends React.Component {
             >
               Edit
             </Button>
-            <p>{this.mockData.name}</p>
+            <p>
+              {this.state.details["firstName"] === "" &&
+              this.state.details["lastName"] === ""
+                ? "N.A."
+                : this.state.details["firstName"] +
+                  " " +
+                  this.state.details["lastName"]}
+            </p>
           </div>
           <Divider />
           <div id="security-card-li-email">
@@ -62,7 +274,7 @@ class Profile_Security extends React.Component {
             >
               Edit
             </Button>
-            <p>{this.mockData.email}</p>
+            <p>{this.state.details["email"]}</p>
           </div>
           <Divider />
           <div id="security-card-li-password">
@@ -78,7 +290,7 @@ class Profile_Security extends React.Component {
             >
               Edit
             </Button>
-            <p>{this.mockData.password}</p>
+            <p>***********</p>
           </div>
           <Divider />
           <div id="security-card-li-phone">
@@ -94,7 +306,11 @@ class Profile_Security extends React.Component {
             >
               Edit
             </Button>
-            <p>{this.mockData.mobileNum}</p>
+            <p>
+              {this.state.details["phone"] === ""
+                ? "N.A."
+                : this.state.details["phone"]}
+            </p>
           </div>
         </Card>
       </div>

@@ -45,7 +45,7 @@ class AppContainer extends React.Component {
   }
 
   //some weird canvas issue with particles-js
-  //this forces the canvas to 'initialize'
+  //this forces the canvas to 're-initialize'
   componentWillUnmount() {
     window.dispatchEvent(new Event("resize"));
   }

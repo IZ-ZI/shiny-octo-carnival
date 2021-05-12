@@ -14,38 +14,64 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 
-const URL = `https://my.api.mockaroo.com/meetings?key=`;
+const URL =
+  "https://18.221.119.146:8000/ppm/managedClient/account/meetingscheduler/";
 
 class MeetingList extends React.Component {
+  meetingsReq;
+  deleteReq;
   constructor(props) {
     super(props);
     this.monitorWindowHeight = this.monitorWindowHeight.bind(this);
   }
 
   state = {
-    dynamicPageSize: 5,
+    dynamicPageSize: Math.floor((window.innerHeight - 250) / 95),
     initLoading: true,
     loading: false,
     data: [],
     list: [],
   };
 
-  componentDidMount() {
-    reqwest({
+  getData = () => {
+    this.meetingsReq = reqwest({
       url: URL,
       type: "json",
       method: "get",
       contentType: "application/json",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
       success: (res) => {
-        if (!Array.isArray(res)) {
-          res = [res].flat();
-        }
         this.setState({
           initLoading: false,
-          data: res,
-          list: res,
+          data: JSON.parse(res.output),
+          list: JSON.parse(res.output),
         });
       },
+    });
+  };
+
+  deleteMeeting = (meetingID) => {
+    this.deleteReq = reqwest({
+      url: URL,
+      type: "json",
+      method: "delete",
+      data: JSON.stringify({ id: meetingID }),
+      contentType: "application/json",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+      success: () => {
+        this.getData();
+        message.success("Meeting successfully deleted.");
+      },
+      error: () => {
+        message.error("Something went wrong when processing your request.");
+      },
+    });
+  };
+
+  componentDidMount() {
+    this.getData();
+    window.api.receive("update-meeting-now", () => {
+      this.getData();
     });
     window.addEventListener("resize", this.monitorWindowHeight);
   }
@@ -58,44 +84,14 @@ class MeetingList extends React.Component {
   }
 
   componentWillUnmount() {
+    if (this.meetingsReq) {
+      this.meetingsReq.abort();
+    }
+    if (this.deleteReq) {
+      this.deleteReq.abort();
+    }
     window.removeEventListener("resize", this.monitorWindowHeight);
   }
-
-  getData = (callback) => {
-    reqwest({
-      url: URL,
-      type: "json",
-      method: "get",
-      contentType: "application/json",
-      success: (res) => {
-        callback(res);
-      },
-    });
-  };
-
-  //onLoadMore = () => {
-  //this.setState({
-  //loading: true,
-  //list: this.state.data.concat(
-  //[...new Array(numOfItems)].map(() => ({ loading: true, name: {} }))
-  //),
-  //});
-  //this.getData((res) => {
-  //const data = this.state.data.concat(res);
-  //this.setState(
-  //{
-  //data,
-  //list: data,
-  //loading: false,
-  //},
-  //() => {
-  //window.dispatchEvent(new Event("resize"));
-  //var objDiv = document.getElementById("bottom");
-  //objDiv.scrollIntoView({ behavior: "smooth" });
-  //}
-  //);
-  //});
-  //};
 
   render() {
     const { initLoading, loading, list } = this.state;
@@ -157,7 +153,7 @@ class MeetingList extends React.Component {
     const offlineGeneral = (key) => {
       return [
         <Button
-          onClick={() => alert(key["$oid"])}
+          onClick={() => this.deleteMeeting(key)}
           className="meeting-list-actions"
           type="link"
         >
@@ -187,27 +183,11 @@ class MeetingList extends React.Component {
       </Button>,
     ];
 
-    //const loadMore =
-    //!initLoading && !loading ? (
-    //<div
-    //style={{
-    //textAlign: "center",
-    //marginTop: 12,
-    //marginBottom: 42,
-    //height: 32,
-    //lineHeight: "32px",
-    //}}
-    //>
-    //<Button onClick={this.onLoadMore}>Fetch Content</Button>
-    //</div>
-    //) : null;
-
     return (
       <List
         loading={initLoading}
         itemLayout="horizontal"
         pagination={{ pageSize: this.state.dynamicPageSize }}
-        //loadMore={loadMore}
         dataSource={list}
         renderItem={(item) => (
           <List.Item

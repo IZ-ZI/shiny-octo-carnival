@@ -10,37 +10,14 @@ import Profile_ExAccount from "./ProfileComponents/Profile_ExAccount";
 const { TabPane } = Tabs;
 
 export default class Profile extends React.Component {
-  state = {
-    initLoading: true,
-    loading: false,
-    data: [],
-    list: [],
-  };
-
-  componentDidMount() {
-    // reqwest({
-    //     url: 'API URL',
-    //     type: 'json',
-    //     method: 'get',
-    //     contentType: 'application/json',
-    //     success: res => {
-    //         this.setState({
-    //             initLoading: false,
-    //             data: res.results,
-    //             list: res.results,
-    //         });
-    //     },
-    // });
-  }
-
   render() {
     return (
       <div id="profile-wrapper">
         <Tabs
-          className="no-select"
           type="card"
-          tabPosition="left"
           size={"large"}
+          tabPosition="left"
+          className="no-select"
         >
           <TabPane tab="Overview" key="1">
             <Profile_Overview />

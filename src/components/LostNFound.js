@@ -7,17 +7,35 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import reqwest from "reqwest";
 
 class LostNFound extends React.Component {
   formRef = React.createRef();
+  lostReq;
+  state = { loading: false };
 
   onFinish = (e) => {
+    this.setState({ loading: true });
     this.formRef.current.resetFields();
-    message.info(
-      "A message has been sent to you by email with instructions on how to reset your password.",
-      3
-    );
-    console.log(e);
+
+    this.lostReq = reqwest({
+      url: "https://18.221.119.146:8000/oum/argusUtils/lossnfound/",
+      method: "post",
+      type: "json",
+      contentType: "application/json",
+      data: JSON.stringify(e),
+      success: () => {
+        this.setState({ loading: false });
+        message.info(
+          "A message has been sent to you by email with instructions on how to reset your password.",
+          3
+        );
+      },
+      error: () => {
+        this.setState({ loading: false });
+        message.error("Something went wrong. Please try again.", 3);
+      },
+    });
   };
 
   render() {
@@ -61,10 +79,11 @@ class LostNFound extends React.Component {
             </Form.Item>
             <Form.Item>
               <Button
-                id="find-account"
-                icon={<SearchOutlined />}
                 type="primary"
+                loading={this.state.loading}
+                id="find-account"
                 htmlType="submit"
+                icon={<SearchOutlined />}
               >
                 Search
               </Button>
