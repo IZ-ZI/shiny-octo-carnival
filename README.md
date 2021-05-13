@@ -1,6 +1,6 @@
 # Argus -- A Hybrid Meeting Manager App
 >### CSDS 395 Senior Project
->#### Randolph Zhao, Grace Yu, Isaac Zhu, Yonghao Zhou,Jack Xi
+>#### Randolph Zhao, Grace Yu, Isaac Zhu, Yonghao Zhou, Jack Xi
 
 # Project Background
 
