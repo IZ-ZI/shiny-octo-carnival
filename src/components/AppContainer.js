@@ -94,7 +94,7 @@ class AppContainer extends React.Component {
               id="sider-bar-container"
               mode="inline"
               theme="dark"
-              defaultSelectedKeys={["3"]}
+              defaultSelectedKeys={["2"]}
               style={{
                 paddingTop: "40px",
                 height: "100%",
@@ -154,7 +154,7 @@ class AppContainer extends React.Component {
           </Sider>
           <Layout>
             <Content className="scroll-container">
-              <Redirect from="/appcontainer" to="/appcontainer/meeting" />
+              <Redirect from="/appcontainer" to="/appcontainer/dashboard" />
               <Switch>
                 <Route path="/appcontainer/dashboard" component={Dashboard} />
                 <Route path="/appcontainer/meeting" component={Meeting} />

@@ -13,7 +13,7 @@ export default function Dashboard_SevenDayGraph({ data }) {
     });
 
     if (!Array.isArray(data)) {
-      data = [data].flat();
+      data = [JSON.parse(data)].flat();
     }
 
     chart.data(data.sort(sortDate));

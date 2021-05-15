@@ -2,7 +2,7 @@ import React from "react";
 import reqwest from "reqwest";
 
 import "antd/dist/antd.css";
-import { Avatar, Tooltip, List, Tag, Button } from "antd";
+import { Avatar, Tooltip, List, Tag, Button, message } from "antd";
 
 import zoomIcon from "../../imgs/zoomIcon.png";
 import regularMeeting from "../../imgs/meeting.png";
@@ -47,6 +47,9 @@ class MeetingList extends React.Component {
           list: JSON.parse(res.output),
         });
       },
+      error: () => {
+        message.error("Something went wrong while fetching meetings.");
+      },
     });
   };
 
@@ -90,6 +93,7 @@ class MeetingList extends React.Component {
     if (this.deleteReq) {
       this.deleteReq.abort();
     }
+    window.api.removeListener("update-meeting-now", this.getData);
     window.removeEventListener("resize", this.monitorWindowHeight);
   }
 

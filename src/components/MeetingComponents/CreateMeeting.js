@@ -85,7 +85,7 @@ const CreateMeeting = (props) => {
   };
 
   const modalFooter = {
-    okText: "Submit",
+    okText: "Create",
     cancelText: "Close",
     okButtonProps: { loading: submitting },
     onOk: handleOK,

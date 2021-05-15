@@ -1,6 +1,9 @@
 import React from "react";
 import ReactDom from "react-dom";
 import Landing from "./Landing";
+import Profile from "../components/Profile";
+import MindMap from "../components/ReportComponents/MindMap";
+import AudioPage from "../components/MeetingComponents/Recording";
 
 particlesJS("particles-js", {
   particles: {
@@ -69,4 +72,4 @@ particlesJS("particles-js", {
   retina_detect: true,
 });
 
-ReactDom.render(<Landing />, document.getElementById("container"));
+ReactDom.render(<MindMap />, document.getElementById("container"));

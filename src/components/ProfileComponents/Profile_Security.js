@@ -44,16 +44,16 @@ class Profile_Security extends React.Component {
     }
     if (this.pwdRef) {
       this.pwdRef.abort();
+      window.dispatchEvent(new Event("resize"));
     }
     if (this.phoneReq) {
       this.phoneReq.abort();
     }
-    window.dispatchEvent(new Event("resize"));
   }
 
   nameRef;
   toUpdateName = (e) => {
-    if (e["firstName"] !== "" || e["lastName"] !== "") {
+    if (e["firstName"] != null || e["lastName"] != null) {
       this.phoneReq = reqwest({
         url:
           "https://18.221.119.146:8000/ppm/managedClient/account/profile/name/",
@@ -63,6 +63,7 @@ class Profile_Security extends React.Component {
         headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
         success: () => {
           message.success("Successfully updated name");
+          this.requestProfile();
         },
         error: () => {
           message.error("An error occurred");
@@ -98,7 +99,7 @@ class Profile_Security extends React.Component {
 
   emailRef;
   toUpdateEmail = (e) => {
-    if (e["email"] !== "") {
+    if (e["email"] != null) {
       this.phoneReq = reqwest({
         url:
           "https://18.221.119.146:8000/ppm/managedClient/account/profile/email/",
@@ -108,6 +109,7 @@ class Profile_Security extends React.Component {
         headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
         success: () => {
           message.success("Successfully updated Email");
+          this.requestProfile();
         },
         error: () => {
           message.error("An error occurred");
@@ -146,7 +148,7 @@ class Profile_Security extends React.Component {
 
   pwdRef;
   toUpdatePassword = (e) => {
-    if (e["password"] !== "") {
+    if (e["password"] != null) {
       this.pwdRef = reqwest({
         url:
           "https://18.221.119.146:8000/ppm/managedClient/account/profile/password/",
@@ -191,7 +193,7 @@ class Profile_Security extends React.Component {
 
   phoneReq;
   toUpdatePhone = (e) => {
-    if (e["phone"] !== "") {
+    if (e["phone"] != null) {
       this.phoneReq = reqwest({
         url:
           "https://18.221.119.146:8000/ppm/managedClient/account/profile/phone/",
@@ -201,6 +203,7 @@ class Profile_Security extends React.Component {
         headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
         success: () => {
           message.success("Successfully updated phone");
+          this.requestProfile();
         },
         error: () => {
           message.error("An error occurred");
@@ -318,3 +321,4 @@ class Profile_Security extends React.Component {
   }
 }
 export default withRouter(Profile_Security);
+//export default Profile_Security;

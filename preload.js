@@ -19,4 +19,10 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.on(event, (e, ...args) => func(...args));
     }
   },
+  removeListener: (channel, func) => {
+    let whiteListEvents = ["update-meeting-now"];
+    if (whiteListEvents.includes(channel)) {
+      ipcRenderer.removeAllListeners(channel);
+    }
+  },
 });

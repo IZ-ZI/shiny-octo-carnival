@@ -96,7 +96,7 @@ class Profile_Overview extends React.Component {
         <h1 style={{ fontSize: "2em", marginTop: "8px" }}>
           <strong>Info</strong>
         </h1>
-        <Card>
+        <Card bodyStyle={{ maxHeight: "400", overflow: "auto" }}>
           <div id="overview-avatar">
             <a
               id="overview-avatar-change"
@@ -211,3 +211,4 @@ class Profile_Overview extends React.Component {
   }
 }
 export default withRouter(Profile_Overview);
+//export default Profile_Overview;

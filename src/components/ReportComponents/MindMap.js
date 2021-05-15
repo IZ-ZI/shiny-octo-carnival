@@ -1,23 +1,32 @@
-import React, { useState, useEffect, useRef } from "react";
 import G6 from "@antv/g6";
 import "antd/dist/antd.css";
+import { withRouter, useHistory } from "react-router-dom";
 import { TweenOneGroup } from "rc-tween-one";
 import { PlusOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useRef } from "react";
 import { PageHeader, Card, Slider, Divider, Skeleton, Tag, Input } from "antd";
 const { Util } = G6;
 
 const MindMap = ({ data }) => {
+  const history = useHistory();
   const inputRef = useRef(null);
   const [keywords, setKeywords] = useState([
+    "Modeling Method",
     "Classification",
-    "Machine Learning",
-    "Ant Design",
-    "Other words",
+    "Regression",
+    "Consensus",
+    "CSDS 395",
+    "Argus",
   ]);
   const [title, setTitle] = useState("Loading...");
-  const [isEditing, setIsEditing] = useState(false);
   const [newKeyword, setNewKeyword] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
   const [loadingConfig, setLoadingConfig] = useState(false);
+  const [mapConfig, setMapConfig] = useState({
+    "layer-size": 3,
+    "layer-number": 2,
+    "sentence-number": 1,
+  });
 
   data = {
     label: "Modeling Methods",
@@ -223,7 +232,7 @@ const MindMap = ({ data }) => {
         <rect style={{ fill: ${color}, width: ${
           width + 24
         }, height: 2, x: 0, y: 22 }} />
-        
+
       </group>
     `;
       },
@@ -266,7 +275,7 @@ const MindMap = ({ data }) => {
         <rect style={{ fill: ${color}, width: ${
           width + 24
         }, height: 2, x: 0, y: 32 }} />
-        
+
       </group>
     `;
       },
@@ -442,17 +451,17 @@ const MindMap = ({ data }) => {
         className="no-select"
         title="After Meeting Report"
         subTitle="viewing meeting MindMap"
-        onBack={() => window.history.back()}
+        onBack={() => history.push("/appcontainer/meeting")}
       />
       <div id="report-mindmap-container"></div>
-      <Card id="report-config-card" title={title}>
+      <Card className="no-select" id="report-config-card" title={title}>
         <Skeleton active={true} loading={loadingConfig}>
           <p>Layer Size</p>
-          <Slider min={2} max={5} />
+          <Slider defaultValue={mapConfig["layer-size"]} min={2} max={5} />
           <p>Layer Number</p>
-          <Slider min={2} max={5} />
+          <Slider defaultValue={mapConfig["layer-number"]} min={2} max={5} />
           <p>Sentence Number</p>
-          <Slider min={1} max={3} />
+          <Slider defaultValue={mapConfig["sentence-number"]} min={1} max={3} />
         </Skeleton>
         <Divider />
         <p>Edit Keywords to Tune the MindMap</p>
@@ -501,4 +510,5 @@ const MindMap = ({ data }) => {
   );
 };
 
+//export default withRouter(MindMap);
 export default MindMap;

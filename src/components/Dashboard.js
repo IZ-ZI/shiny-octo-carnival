@@ -31,11 +31,13 @@ class Dashboard extends React.Component {
   }
 
   intervalID = 0;
+  bannerReq;
   avatarReq;
   graphReq;
 
   state = {
-    loading: true,
+    bannerLoading: true,
+    graphLoading: true,
     graphData: [],
     network: navigator.onLine ? "online" : "offline",
     tReport: "Loading...",
@@ -53,18 +55,38 @@ class Dashboard extends React.Component {
     }, 1000);
   }
 
-  getGraphData() {
-    this.graphReq = reqwest({
-      url: "https://my.api.mockaroo.com/dash_meetings?key=",
+  getBannerData() {
+    this.bannerReq = reqwest({
+      url:
+        "https://18.221.119.146:8000/ppm/managedClient/account/meetingstats/",
       type: "json",
-      method: "get",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
       success: (res) => {
-        this.setState({ graphData: res, loading: false });
+        this.setState({
+          tReport: res.output["report"],
+          tMeeting: res.output["today"],
+          wMeeting: res.output["week"],
+          bannerLoading: false,
+        });
       },
       error: () => {
-        setTimeout(function () {
-          message.error("Something went wrong.");
-        }, 1000);
+        message.error("Something went wrong.");
+      },
+    });
+  }
+
+  getGraphData() {
+    this.graphReq = reqwest({
+      url:
+        "https://18.221.119.146:8000/ppm/managedClient/account/meetinggraph/",
+      type: "json",
+      method: "get",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+      success: (res) => {
+        this.setState({ graphData: res.output, graphLoading: false });
+      },
+      error: () => {
+        message.error("Something went wrong.");
       },
     });
   }
@@ -86,6 +108,7 @@ class Dashboard extends React.Component {
   componentDidMount() {
     this.updateTime();
     this.getGraphData();
+    this.getBannerData();
     this.bindInternetListeners();
     this.avatarReq = reqwest({
       url: "https://randomuser.me/api/?result=1&inc=picture",
@@ -153,7 +176,7 @@ class Dashboard extends React.Component {
               <Statistic
                 title="Weekly Forecast"
                 prefix={<CalendarOutlined style={{ color: "#1890ff" }} />}
-                value={this.state.tMeeting}
+                value={this.state.wMeeting}
               />
             </Card>
           </Col>
@@ -163,12 +186,16 @@ class Dashboard extends React.Component {
               <Statistic
                 title="Available Reports"
                 prefix={<CopyOutlined style={{ color: "#1890ff" }} />}
-                value={this.state.tMeeting}
+                value={this.state.tReport}
               />
             </Card>
           </Col>
         </Row>
-        <Skeleton active loading={this.state.loading} paragraph={{ rows: 16 }}>
+        <Skeleton
+          active
+          loading={this.state.graphLoading}
+          paragraph={{ rows: 16 }}
+        >
           <Dashboard_SevenDayGraph data={this.state.graphData} />
         </Skeleton>
       </div>
