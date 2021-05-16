@@ -245,7 +245,6 @@
   width: 90%;
   height: fit-content;
   display: flex;
-  padding: 32px;
   align-items: left;
   margin: 32px 32px 0px;
 }
@@ -262,7 +261,7 @@
 }
 
 #profile-wrapper > .ant-tabs-left > .ant-tabs-content-holder {
-  width: 35vw;
+  width: 512px;
 }
 
 #overview-wrapper {
