@@ -18,7 +18,7 @@ const createWindow = () => {
   // Create the browser window.
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   //adaptive zoom.
-  const factor = screen.getPrimaryDisplay().scaleFactor * 0.9;
+  const factor = screen.getPrimaryDisplay().scaleFactor;
   const mainWindow = new BrowserWindow({
     show: false,
     opacity: 0,
@@ -27,7 +27,6 @@ const createWindow = () => {
     minWidth: parseInt(width * 0.5),
     minHeight: parseInt(height * 0.55),
     webPreferences: {
-      zoomFactor: 1 / factor,
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
@@ -36,13 +35,15 @@ const createWindow = () => {
   });
 
   // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, "index.html"));
+  mainWindow.loadURL("http://127.0.0.1:8080");
+  mainWindow.loadFile("index.html");
 
   // mainWindow.removeMenu();
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 
   mainWindow.once("ready-to-show", () => {
+    console.log(app.getPath("userData"));
     mainWindow.show();
     let totalSteps = 100.0;
     let totalTime = 500.0;
@@ -87,8 +88,7 @@ ipcMain.on("save-login", (event, arg) => {
     buttons: ["OK"],
     defaultId: 1,
     title: "Info",
-    message: "Received Log In Attempt",
-    detail: arg.toString(),
+    message: "Coming in a future update...",
   };
   dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), options);
 });

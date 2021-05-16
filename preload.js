@@ -1,5 +1,5 @@
 const { contextBridge, ipcRenderer } = require("electron");
-
+console.log(require("electron").webFrame.getZoomFactor());
 contextBridge.exposeInMainWorld("api", {
   send: (event, payload) => {
     let whiteListEvents = [
