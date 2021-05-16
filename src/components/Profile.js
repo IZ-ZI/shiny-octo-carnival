@@ -13,12 +13,7 @@ export default class Profile extends React.Component {
   render() {
     return (
       <div id="profile-wrapper">
-        <Tabs
-          type="card"
-          size={"large"}
-          tabPosition="left"
-          className="no-select"
-        >
+        <Tabs tabPosition="left" size={"large"} className="no-select">
           <TabPane tab="Overview" key="1">
             <Profile_Overview />
           </TabPane>

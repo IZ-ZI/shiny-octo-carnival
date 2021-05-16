@@ -55,7 +55,7 @@ class Profile_Overview extends React.Component {
   }
 
   componentDidMount() {
-    this.requestProfile();
+    //this.requestProfile();
   }
 
   changeAvatar() {
@@ -67,7 +67,9 @@ class Profile_Overview extends React.Component {
   }
 
   componentWillUnmount() {
-    this.profileReq.abort();
+    if (this.profileReq) {
+      this.profileReq.abort();
+    }
   }
 
   tryLogout() {
@@ -211,4 +213,3 @@ class Profile_Overview extends React.Component {
   }
 }
 export default withRouter(Profile_Overview);
-//export default Profile_Overview;

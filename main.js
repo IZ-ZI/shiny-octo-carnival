@@ -17,6 +17,8 @@ if (require("electron-squirrel-startup")) {
 const createWindow = () => {
   // Create the browser window.
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  //adaptive zoom.
+  const factor = screen.getPrimaryDisplay().scaleFactor * 0.9;
   const mainWindow = new BrowserWindow({
     show: false,
     opacity: 0,
@@ -25,6 +27,7 @@ const createWindow = () => {
     minWidth: parseInt(width * 0.5),
     minHeight: parseInt(height * 0.55),
     webPreferences: {
+      zoomFactor: 1 / factor,
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,

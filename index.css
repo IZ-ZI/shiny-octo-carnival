@@ -249,30 +249,43 @@
 }
 
 #profile-wrapper {
-  height: 100%;
-  max-width: 65%;
-}
-
-#profile-wrapper > .ant-tabs-card {
-  height: 100%;
-}
-
-#profile-wrapper > .ant-tabs-card .ant-tabs-content {
+  width: 90%;
   height: fit-content;
-  min-width: 512px;
-  margin-left: -1px;
-  background-color: #ffffff;
-}
-
-#profile-wrapper > .ant-tabs-card .ant-tabs-content > .ant-tabs-tabpane {
-  min-width: 512px;
+  display: flex;
   padding: 32px;
+  align-items: left;
+  margin: 32px 32px 0px;
 }
 
-#profile-wrapper > .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active,
-.ant-tabs-card > div > .ant-tabs-nav .ant-tabs-tab-active {
-  background: #e6f7ff;
+#profile-wrapper > .ant-tabs-large > .ant-tabs-nav .ant-tabs-tab {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #263859;
 }
+
+#profile-wrapper > .ant-tabs {
+  height: 80%;
+  width: fit-content;
+}
+
+#profile-wrapper > .ant-tabs-left > .ant-tabs-content-holder {
+  width: 35vw;
+}
+
+/*#profile-wrapper > .ant-tabs-content .ant-tabs-content-left {*/
+/*height: fit-content;*/
+/*border: 2px solid green;*/
+/*background-color: #ffffff;*/
+/*}*/
+
+/*#profile-wrapper > .ant-tabs-card .ant-tabs-content > .ant-tabs-tabpane {*/
+/*border: 2px solid blue;*/
+/*}*/
+
+/*#profile-wrapper > .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active,*/
+/*.ant-tabs-card > div > .ant-tabs-nav .ant-tabs-tab-active {*/
+/*background: #e6f7ff;*/
+/*}*/
 
 #overview-wrapper {
   display: flex;
@@ -303,11 +316,19 @@
   filter: brightness(0.5);
 }
 
+#overview-info .ant-input-affix-wrapper-disabled {
+  color: #263859 !important;
+}
+
+#overview-info .ant-input-affix-wrapper-disabled .ant-input[disabled] {
+  color: #263859 !important;
+  font-weight: bold !important;
+}
+
 #overview-button-wrapper {
   width: 90%;
   height: auto;
   display: flex;
-  margin-left: 16px;
   align-items: center;
   justify-content: center;
 }
@@ -378,7 +399,7 @@
 #report-mindmap-container {
   bottom: 0;
   width: 70%;
-  height: 90%;
+  height: 80%;
   min-height: 400px;
   position: absolute;
   border-radius: 16px;
@@ -392,7 +413,7 @@
 #report-config-card {
   bottom: 0;
   width: 22vw;
-  height: 90%;
+  height: 80%;
   min-height: 400px;
   margin-left: 75%;
   overflow-x: hidden;

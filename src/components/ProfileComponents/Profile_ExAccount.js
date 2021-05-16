@@ -54,4 +54,3 @@ class Profile_ExAccount extends React.Component {
   }
 }
 export default withRouter(Profile_ExAccount);
-//export default Profile_ExAccount;

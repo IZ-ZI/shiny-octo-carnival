@@ -31,19 +31,21 @@ class Profile_Security extends React.Component {
   }
 
   componentDidMount() {
-    this.requestProfile();
+    //this.requestProfile();
   }
 
   componentWillUnmount() {
-    this.securityReq.abort();
-    if (this.nameRef) {
-      this.nameRef.abort();
+    if (this.securityReq) {
+      this.securityReq.abort();
     }
-    if (this.emailRef) {
-      this.emailRef.abort();
+    if (this.nameReq) {
+      this.nameReq.abort();
     }
-    if (this.pwdRef) {
-      this.pwdRef.abort();
+    if (this.emailReq) {
+      this.emailReq.abort();
+    }
+    if (this.pwdReq) {
+      this.pwdReq.abort();
       window.dispatchEvent(new Event("resize"));
     }
     if (this.phoneReq) {
@@ -51,10 +53,10 @@ class Profile_Security extends React.Component {
     }
   }
 
-  nameRef;
+  nameReq;
   toUpdateName = (e) => {
     if (e["firstName"] != null || e["lastName"] != null) {
-      this.phoneReq = reqwest({
+      this.nameReq = reqwest({
         url:
           "https://18.221.119.146:8000/ppm/managedClient/account/profile/name/",
         type: "json",
@@ -97,10 +99,10 @@ class Profile_Security extends React.Component {
     });
   }
 
-  emailRef;
+  emailReq;
   toUpdateEmail = (e) => {
     if (e["email"] != null) {
-      this.phoneReq = reqwest({
+      this.emailReq = reqwest({
         url:
           "https://18.221.119.146:8000/ppm/managedClient/account/profile/email/",
         type: "json",
@@ -146,10 +148,10 @@ class Profile_Security extends React.Component {
     document.getElementById("particles-js").style.display = "inline";
   }
 
-  pwdRef;
+  pwdReq;
   toUpdatePassword = (e) => {
     if (e["password"] != null) {
-      this.pwdRef = reqwest({
+      this.pwdReq = reqwest({
         url:
           "https://18.221.119.146:8000/ppm/managedClient/account/profile/password/",
         type: "json",
@@ -321,4 +323,3 @@ class Profile_Security extends React.Component {
   }
 }
 export default withRouter(Profile_Security);
-//export default Profile_Security;
