@@ -13,5 +13,8 @@ urlpatterns = [
     path('account/profile/email/', views.emailHandler),
     path('account/profile/phone/', views.phoneHandler),
     path('logout/', views.logout),
-    path('account/meetingscheduler/', views.meetinghandler)
+    path('account/meetingscheduler/', views.meetinghandler),
+    path('account/meetingstats/', views.meetingStats),
+    path('account/meetinggraph/', views.meetingGraphs),
+    path('account/mindmap/', views.getmindmap),
 ]

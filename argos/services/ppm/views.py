@@ -7,20 +7,24 @@ from django.views.decorators.http import require_http_methods
 from .. import models
 # python lib imports
 from datetime import datetime as dt
+from datetime import date
+from datetime import timedelta
 import json, requests, os.path, base64, dateutil, dateutil.parser, datetime
+from os import path
 import pytz
+# third party imports
+from ..ml_toolkit import sample
 
 utc = pytz.UTC
-
-BODY = {
-    'clientservices': '',
-    'output': '',
-    'status': ''
-}
 
 # default services
 @require_http_methods(['GET'])
 def argusinfo(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     BODY['clientservices'] = 'retrieve_argusinfo'
     if request.headers.get('X-API-SESSION') is None:
         BODY['output'] = 'Internal server error. Session key not provided.'
@@ -47,6 +51,11 @@ def argusinfo(request):
 
 @require_http_methods(['GET'])
 def zoominfo(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     BODY['clientservices'] = 'me@zoom'
     id = getId(request.headers.get('X-API-SESSION'))
     user = User.objects.get(username=id)
@@ -90,7 +99,11 @@ def meetinghandler(request):
     # types: 0 (zoom), 1 (in person)
     # status: 0 (future meeting), 1 (in progress), 2 (finished), 3 (report ready)
     # meeting duration (optional field)
-
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     if request.headers.get('X-API-SESSION') is None:
         BODY['output'] = 'Internal server error. Session key not provided.'
         BODY['status'] = 'FAILED_TO_START'
@@ -106,14 +119,13 @@ def meetinghandler(request):
 
         BODY['clientservices'] = 'create_meeting'
         # load jsons
-        print(request.body)
         data = json.loads(request.body.decode('utf-8'))
         topic = data['topic']
         types = data['type']
         starttime = data['startTime']
+        print(starttime)
         hours = data['duration-hour']
         minutes = data['duration-minute']
-        print(topic, types, starttime, hours, minutes)
         # store into db
         meeting = models.Meeting.objects.create(user=user)
         meeting.m_topic = topic
@@ -140,12 +152,14 @@ def meetinghandler(request):
             strified_mdy = str(localDatetime.strftime('%m/%d/%Y'))
             strified_time = str(localDatetime.strftime('%H:%M %p'))
             status = -1
-            if (value > utc.localize(dt.utcnow())):
+            if value > utc.localize(dt.utcnow()):
                 # meeting is in the future
                 status = 0
-            elif (value < utc.localize(dt.utcnow())):
+            elif value < utc.localize(dt.utcnow()):
                 # meeting has finished
                 status = 2
+            if meeting.is_report == True:
+                status = 3
             meeting = {
                 'id': meeting.m_id,
                 'date': strified_mdy,
@@ -170,10 +184,158 @@ def meetinghandler(request):
         BODY['status'] = 'COMPLETED_OK'
         return JsonResponse(BODY, status=200)
 
+@require_http_methods(['POST'])
+def getmindmap(request):
+    BODY = {
+        'clientservices': 'get_mindmap',
+        'output': '',
+        'status': ''
+    }
+    if request.headers.get('X-API-SESSION') is None:
+        BODY['output'] = 'Internal server error. Session key not provided.'
+        BODY['status'] = 'FAILED_TO_START'
+        return JsonResponse(BODY, status=500)
+    id = getId(request.headers.get('X-API-SESSION'))
+    user = User.objects.get(username=id)
+    if user is None:
+        BODY['output'] = 'Internal server error. Unable to validate user authenticity from session.'
+        BODY['status'] = 'COMPLETED_WITH_ERROR'
+        return JsonResponse(BODY, status=500)
+    # get id, and ml params
+    data = json.loads(request.body.decode('utf-8'))
+    m_id = data['id']
+    layer_number = data['layerNumber']
+    layer_size = data['layerSize']
+    leaf_size = data['sentenceNumber']
+    words = data['keywords']
+    print(m_id, layer_number, layer_size, leaf_size, words)
+    file_loc = os.getcwd() + '/m_records/vtts/' + str(m_id) + '.vtt'
+    altfile_loc = os.getcwd() + '/m_records/vtts/' + str(m_id) + '.txt'
+    print(file_loc)
+    if path.exists(file_loc):
+        print('file found')
+        trans = sample.get_transcript(file_loc)
+        mmap = sample.text2mindmap(trans, layer_number, layer_size, leaf_size, words)
+        BODY['output'] = json.dumps(mmap)
+        BODY['status'] = 'COMPLETED_OK'
+        print(BODY)
+        return JsonResponse(BODY, status=200)
+    elif path.exists(altfile_loc):
+        print('file found')
+        with open(altfile_loc, 'r') as f:
+            content = f.readlines()
+            text = ""
+            for line in content:
+                text += " " + line
+            mmap = sample.text2mindmap(text, layer_number, layer_size, leaf_size, words)
+        BODY['output'] = json.dumps(mmap)
+        BODY['status'] = 'COMPLETED_OK'
+        print(BODY)
+        return JsonResponse(BODY, status=200)
+    else:
+        print('file not found')
+        BODY['output'] = 'There was an error fetching mindmap, mindmap could have been not generated.'
+        BODY['status'] = 'COMPLETED_WITH_ERROR'
+        return JsonResponse(BODY, status=500)
+
+@require_http_methods(['GET'])
+def meetingStats(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
+    BODY['clientservices'] = 'meeting_stats'
+    if request.headers.get('X-API-SESSION') is None:
+        BODY['output'] = 'Internal server error. Session key not provided.'
+        BODY['status'] = 'FAILED_TO_START'
+        return JsonResponse(BODY, status=500)
+    id = getId(request.headers.get('X-API-SESSION'))
+    user = User.objects.get(username=id)
+    if user is None:
+        BODY['output'] = 'Internal server error. Unable to validate user authenticity from session.'
+        BODY['status'] = 'COMPLETED_WITH_ERROR'
+        return JsonResponse(BODY, status=500)
+    allmeetings = models.Meeting.objects.filter(user_id=user.id)
+    # get today's meetings
+    day_m = 0
+    week_m = 0
+    report = 0
+    for meeting in allmeetings:
+        if meeting.m_topic is None:
+            # we skip empty meetings without headers
+            continue
+        date_time = meeting.m_date
+        value = dateutil.parser.isoparse(date_time)
+        value = value.astimezone(pytz.timezone('America/Toronto'))
+        if value.date() == dt.today().date():
+            day_m += 1
+        today = date.today()
+        start = today - timedelta(days=today.weekday())
+        end = start + timedelta(days=6)
+        if (start <= value.date() <= end):
+            week_m += 1
+        if meeting.is_report == True:
+            report += 1
+    params = {
+        'today': day_m,
+        'week': week_m,
+        'report': report,
+    }
+    BODY['output'] = params
+    BODY['status'] = 'COMPLETED_OK'
+    return JsonResponse(BODY, status=200)
+
+@require_http_methods(['GET'])
+def meetingGraphs(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
+    BODY['clientservices'] = 'meeting_graphs'
+    if request.headers.get('X-API-SESSION') is None:
+        BODY['output'] = 'Internal server error. Session key not provided.'
+        BODY['status'] = 'FAILED_TO_START'
+        return JsonResponse(BODY, status=500)
+    id = getId(request.headers.get('X-API-SESSION'))
+    user = User.objects.get(username=id)
+    if user is None:
+        BODY['output'] = 'Internal server error. Unable to validate user authenticity from session.'
+        BODY['status'] = 'COMPLETED_WITH_ERROR'
+        return JsonResponse(BODY, status=500)
+    allmeetings = models.Meeting.objects.filter(user_id=user.id)
+    meeting_freq = {}
+    params = []
+    for meeting in allmeetings:
+        if meeting.m_topic is None:
+            # we skip empty meetings without headers
+            continue
+        date_time = meeting.m_date
+        value = dateutil.parser.isoparse(date_time)
+        value = value.astimezone(pytz.timezone('America/Toronto'))
+        try:
+            kv = meeting_freq.get(str(value.date()))
+            meeting_freq[str(value.date())] = kv + 1
+        except Exception as e:
+            # meeting not hashed yet
+            # set as 0
+            meeting_freq[str(value.date())] = 1
+    for key, value in meeting_freq.items():
+        p = {'Date': key, 'Number of Meetings': value}
+        params.append(p)
+    BODY['output'] = json.dumps(params)
+    BODY['status'] = 'COMPLETED_OK'
+    return JsonResponse(BODY, status=200)
 
 # user information updates
 @require_http_methods(['POST'])
 def passwordHandler(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     BODY['clientservices'] = 'update_password'
     if request.headers.get('X-API-SESSION') is None:
         BODY['output'] = 'Internal server error. Session key not provided.'
@@ -185,21 +347,25 @@ def passwordHandler(request):
         BODY['output'] = 'Internal server error. Unable to validate user authenticity from session.'
         BODY['status'] = 'COMPLETED_WITH_ERROR'
         return JsonResponse(BODY, status=500)
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        try:
-            password = data['password']
-            user.set_password(password)
-            user.save()
-            BODY['output'] = 'password has been updated.'
-            BODY['status'] = 'COMPLETED_OK'
-        except:
-            BODY['output'] = 'password failed to updated.'
-            BODY['status'] = 'COMPLETED_WITH_ERROR'
+    data = json.loads(request.body.decode('utf-8'))
+    try:
+        password = data['password']
+        user.set_password(password)
+        user.save()
+        BODY['output'] = 'password has been updated.'
+        BODY['status'] = 'COMPLETED_OK'
+    except:
+        BODY['output'] = 'password failed to updated.'
+        BODY['status'] = 'COMPLETED_WITH_ERROR'
     return JsonResponse(BODY, status=200)
 
 @require_http_methods(['POST', 'GET'])
 def nameHandler(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     if request.headers.get('X-API-SESSION') is None:
         BODY['output'] = 'Internal server error. Session key not provided.'
         BODY['status'] = 'FAILED_TO_START'
@@ -213,11 +379,16 @@ def nameHandler(request):
         return JsonResponse(BODY, status=500)
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
+        first = None
+        last = None
         try:
             first = data['firstName']
+        except:
+            first = None
+        try:
             last = data['lastName']
         except:
-            pass
+            last = None
         if first is not None:
             user.first_name = first
         else:
@@ -244,8 +415,13 @@ def nameHandler(request):
         BODY['status'] = 'COMPLETED_OK'
     return JsonResponse(BODY, status=200)
 
-@require_http_methods(['POST'])
+@require_http_methods(['POST', 'GET'])
 def emailHandler(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     if request.headers.get('X-API-SESSION') is None:
         BODY['output'] = 'Internal server error. Session key not provided.'
         BODY['status'] = 'FAILED_TO_START'
@@ -275,8 +451,13 @@ def emailHandler(request):
     return JsonResponse(BODY, status=200)
 
 
-@require_http_methods(['POST'])
+@require_http_methods(['POST', 'GET'])
 def phoneHandler(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     if request.headers.get('X-API-SESSION') is None:
         BODY['output'] = 'Internal server error. Session key not provided.'
         BODY['status'] = 'FAILED_TO_START'
@@ -290,8 +471,14 @@ def phoneHandler(request):
         return JsonResponse(BODY, status=500)
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        user.profile.phone = data['phone']
-        user.save()
+        phone = None
+        try:
+            phone = data['phone']
+        except:
+            phone = None
+        if phone is not None:
+            user.profile.phone = data['phone']
+            user.save() 
         params = {
             'phone': data['phone']
         }
@@ -307,6 +494,11 @@ def phoneHandler(request):
 
 @require_http_methods(['POST'])
 def renewsession(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     BODY['clientservices'] = 'refresh_access_token'
     user = User.objects.get(username=getId(request.headers.get('X-API-SESSION')))
     r = exe_refresh(user.profile.renew)
@@ -334,6 +526,11 @@ def renewsession(request):
 
 @require_http_methods(['POST'])
 def logout(request):
+    BODY = {
+        'clientservices': '',
+        'output': '',
+        'status': ''
+    }
     BODY['clientservices'] = 'logout'
     if request.headers.get('X-API-SESSION') is None:
         BODY['output'] = 'Internal server error. Session key not provided.'

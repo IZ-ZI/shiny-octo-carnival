@@ -26,6 +26,8 @@ class Meeting(models.Model):
     m_date = models.CharField(max_length=28, null=True)
     m_creation = models.DateField(null=True)
     m_length = models.CharField(max_length=5, null=True)
+    m_uuid = models.CharField(max_length=50, null=True)
+    is_report = models.BooleanField(default=False)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

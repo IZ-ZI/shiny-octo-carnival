@@ -161,6 +161,7 @@ class Text2Mindmap():
                 elif i > j:
                     self.simi_matrix[i][j] = self.simi_matrix[j][i]
         median = np.median(self.simi_matrix)
+        
         for i in range(self.sent_nums):
             for j in range(self.sent_nums):
                 if self.simi_matrix[i][j] < median:

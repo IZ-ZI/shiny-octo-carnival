@@ -7,53 +7,56 @@ from django.views.decorators.http import require_http_methods
 from .. import models
 # python lib imports
 from datetime import datetime as dt
-import json, base64, os.path, requests, time, datetime, random
+import json, base64, os.path, requests, time, datetime, random, shutil, dateutil.parser
 # third-party imports
 from backports.pbkdf2 import pbkdf2_hmac
 from fnmatch import fnmatch
-
-zoom_code = []
-
-BODY = {
-    'authentication': '',
-    'output': '',
-    'status': ''
-}
+from ..ml_toolkit import sample
 
 # could deprecate
 @require_http_methods(['GET'])
 def oauthToken(request):
     code = request.GET.dict()['code']
-    zoom_code.append(code)
-    # intended to return nothing, similar to async to wait for GUI feedback
-    # POST to Zoom OAuth
-    BODY['authentication'] = 'oathToken'
-    r = post2Zoom(code)
-    if r.status_code != 200:
-        BODY['output'] = 'core services failed to initiate session from Zoom OAuth.'
-        BODY['status'] = 'FAILED_TO_COMPLETE'
-        return JsonResponse(BODY, status=500)
-    data = json.loads(r.text)
-    # zoom returned body parameters
-    token = data['access_token']
-    ttype = data['token_type']
-    ref_token = data['refresh_token']
-    ttl = data['expires_in']
-    scope = data['scope']
-    # feedback to GUI
-    param = {
-        'token': token,
-        'token_type': ttype,
-        'refresh_token': ref_token,
-        'expiration_time': ttl,
+    # zoom_code.append(code)
+    # # intended to return nothing, similar to async to wait for GUI feedback
+    # # POST to Zoom OAuth
+    # BODY['authentication'] = 'oathToken'
+    # r = post2Zoom(code)
+    # if r.status_code != 200:
+    #     BODY['output'] = 'core services failed to initiate session from Zoom OAuth.'
+    #     BODY['status'] = 'FAILED_TO_COMPLETE'
+    #     return JsonResponse(BODY, status=500)
+    # data = json.loads(r.text)
+    # # zoom returned body parameters
+    # token = data['access_token']
+    # ttype = data['token_type']
+    # ref_token = data['refresh_token']
+    # ttl = data['expires_in']
+    # scope = data['scope']
+    # # feedback to GUI
+    # param = {
+    #     'token': token,
+    #     'token_type': ttype,
+    #     'refresh_token': ref_token,
+    #     'expiration_time': ttl,
+    # }
+    BODY = {
+        'authentication': '',
+        'output': '',
+        'status': ''
     }
     BODY['authentication'] = 'web-based authentication is deprecated. Will be removed in next office version release'
-    BODY['output'] = param
+    BODY['output'] = {}
     BODY['status'] = 'COMPLETED_OK'
-    return JsonResponse(BODY, status=200)
+    return HttpResponse()
 
 @require_http_methods(['GET'])
 def linkZoomSession(request):
+    BODY = {
+        'authentication': '',
+        'output': '',
+        'status': ''
+    }
     BODY['authentication'] = 'connect_zoom_session'
     code = request.GET.dict()['code']
     if request.headers.get('X-API-SESSION') is None:
@@ -111,6 +114,11 @@ def linkZoomSession(request):
 
 @require_http_methods(['PUT'])
 def signup(request):
+    BODY = {
+        'authentication': '',
+        'output': '',
+        'status': ''
+    }
     BODY['authentication'] = 'signup'
     data = json.loads(request.body.decode('utf-8'))
     id = data['username']
@@ -139,9 +147,15 @@ def signup(request):
 
 @require_http_methods(['POST'])
 def login(request):
+    BODY = {
+        'authentication': '',
+        'output': '',
+        'status': ''
+    }
     data = json.loads(request.body.decode('utf-8'))
     id = data['username']
     pswd = data['password']
+    print(id, pswd)
     # do something
     user = authenticate(username=id, password=pswd)
     BODY['authentication'] = 'login'
@@ -190,67 +204,115 @@ def forgotpswd(request):
 
 @require_http_methods(['POST'])
 def hooks(request):
+    BODY = {
+        'authentication': '',
+        'output': '',
+        'status': ''
+    }
     print(request.body.decode('utf-8'))
     data = json.loads(request.body.decode('utf-8'))
     # we determine event for meetings
     event = data['event']
+    cur_path = os.path.dirname(__file__)
     if event == 'meeting.started':
-        uuid = data['payload']['object']['uuid']
+        uuid = data['payload']['object']['uuid'].replace('/', '-')
         host_id = data['payload']['object']['host_id']
         # time in UTC
         start = data['payload']['object']['start_time']
         # we start a file recording all possible participants
-        f = open('./buffer/' + str(uuid) + '-' + str(host_id) + str(start) + '.txt', 'w')
-        f.close()
+        new_path = cur_path + '/buffer/' + uuid + '-' + host_id + start + '.txt'
+        with open(new_path, 'w') as f:
+            # do nothing, only open file
+            f.close()
     elif event == 'meeting.ended':
         # we finish a file
-        uuid = data['payload']['object']['uuid']
+        uuid = data['payload']['object']['uuid'].replace('/', '-')
         host_id = data['payload']['object']['host_id']
-        user = models.Profile.objects.filter(zoom_id=host_id)
-        if len(user) == 1:
+        user = models.Profile.objects.get(zoom_id=host_id)
+        if user is not None:
             # found the host
-            for filename in os.listdir('./services/oum/buffer'):
-                if fnmatch(filename, str(host_id)):
-                    values = filename.split('-')
-                    # find length of meeting
-                    start = dateutil.parser.parse(data['payload']['object']['start_time'])
-                    end = dateutil.parser.parse(data['payload']['object']['end_time'])
-                    td = end - start
-                    # create new meeting entry in db
-                    meeting = models.Meeting.objects.create(user=user)
-                    meeting.m_topic = data['payload']['object']['topic']
-                    meeting.m_creation = start
-                    meeting.m_date = start
-                    meeting.m_length = str(td.seconds//3600) + ':' + str((td.seconds//60)%60)
-                    meeting.m_type = '0'
-                    meeting.save()
-                    user.save()
+            for filename in os.listdir('./services/oum/buffer/'):
+                if str(host_id) in filename:
+                    if str(uuid) in filename:
+                        if not os.path.exists('./m_records/' + host_id + '/'):
+                            os.makedirs('./m_records/' + host_id + '/')
+                        shutil.move(cur_path + '/buffer/' + filename, os.getcwd() + '/m_records/' + host_id + '/' + filename)
+                        values = filename.split('-')
+                        # find length of meeting
+                        start = dateutil.parser.parse(data['payload']['object']['start_time'])
+                        end = dateutil.parser.parse(data['payload']['object']['end_time'])
+                        td = end - start
+                        # create new meeting entry in db
+                        meeting = models.Meeting.objects.create(user=User.objects.get(id=user.user_id))
+                        meeting.m_topic = data['payload']['object']['topic']
+                        meeting.m_creation = start
+                        meeting.m_date = start
+                        meeting.m_length = str(td.seconds//3600) + ':' + str((td.seconds//60)%60)
+                        meeting.m_type = '0'
+                        meeting.m_uuid = uuid
+                        meeting.save()
+                        user.save()
+                        # 
     elif event == 'meeting.participant_joined':
-        uuid = data['payload']['object']['uuid']
+        uuid = data['payload']['object']['uuid'].replace('/', '-')
         host_id = data['payload']['object']['host_id']
         # time in UTC
         start = data['payload']['object']['start_time']
-        f = open('./buffer/' + str(uuid) + '-' + str(host_id) + str(start) + '.txt', 'a')
-        # get participant id, name, email, join time
-        id = data['payload']['object']['participant']['user_id']
-        name = data['payload']['object']['participant']['user_name']
-        email = data['payload']['object']['participant']['email']
-        time = data['payload']['object']['participant']['join_time']
-        f.write(str(id), str(name), str(email), str(time), + 'joined\n')
-        f.close()
+        if os.path.isfile(cur_path + '/buffer/' + uuid + '-' + host_id + start + '.txt'):
+            new_path = cur_path + '/buffer/' + uuid + '-' + host_id + start + '.txt'
+            with open(new_path, 'a') as f:
+                # get participant id, name, email, join time
+                id = data['payload']['object']['participant']['user_id']
+                name = data['payload']['object']['participant']['user_name']
+                email = data['payload']['object']['participant']['email']
+                time = data['payload']['object']['participant']['join_time']
+                f.write(str(id) + ", " + str(name) + ", " + str(email) + ", " + str(time) + ", " + 'joined\n')
     elif event == 'meeting.participant_left':
-        uuid = data['payload']['object']['uuid']
+        uuid = data['payload']['object']['uuid'].replace('/', '-')
         host_id = data['payload']['object']['host_id']
         # time in UTC
         start = data['payload']['object']['start_time']
-        f = open('./buffer/' + str(uuid) + '-' + str(host_id) + str(start) + '.txt', 'a')
-        # get participant id, name, email, join time
-        id = data['payload']['object']['participant']['user_id']
-        name = data['payload']['object']['participant']['user_name']
-        email = data['payload']['object']['participant']['email']
-        time = data['payload']['object']['participant']['leave_time']
-        f.write(str(id), str(name), str(email), str(time), + 'left\n')
-        f.close()
+        if os.path.isfile(cur_path + '/buffer/' + uuid + '-' + host_id + start + '.txt'):
+            new_path = cur_path + '/buffer/' + uuid + '-' + host_id + start + '.txt'
+            with open(new_path, 'a') as f:
+                # get participant id, name, email, left time
+                id = data['payload']['object']['participant']['user_id']
+                name = data['payload']['object']['participant']['user_name']
+                email = data['payload']['object']['participant']['email']
+                time = data['payload']['object']['participant']['leave_time']
+                f.write(str(id) + ", " + str(name) + ", " + str(email) + ", " + str(time) + ", " + 'left\n')
+    elif event == 'recording.transcript_completed':
+        meeting_id = data['payload']['object']['uuid'].replace('/', '-')
+        r_files = data['payload']['object']['recording_files']
+        host_id = data['payload']['object']['host_id']
+        download_url = None
+        token = None
+        for i in range(len(r_files)):
+            r_file = r_files[i]
+            if r_file['file_extension'] == 'VTT':
+                download_url = r_file['download_url']
+                token = data['download_token']
+                break
+        if download_url is not None and token is not None:
+            header = {
+                'Authorization': 'Bearer ' + token
+            }
+            payload = requests.get(download_url, headers=header)
+            if payload.status_code == 200:
+                meeting = models.Meeting.objects.get(m_uuid=meeting_id)
+                if meeting is not None:
+                    meeting.is_report = True
+                    meeting.save()
+                # create mindmap
+                print(payload.content.decode('utf-8'))
+                temp_vtt = os.getcwd() + '/m_records/vtts/' + str(meeting.m_id) + '.vtt'
+                with open(temp_vtt, 'w') as file:
+                    file.write(payload.content.decode('utf-8'))
+                mmap = sample.text2mindmap(sample.get_transcript(temp_vtt))
+                # mmap is not generated due to size constraint
+                if mmap is None:
+                    meeting.is_report = False
+                    meeting.save()
     return JsonResponse(data, status=200)
 
 def dev(request):
@@ -300,7 +362,6 @@ def storeSession(id):
 
 def random_session(id):
     # generate a session based on time stamp
-    print(base64.b64encode(os.urandom(800)))
     return base64.b64encode(os.urandom(800)).decode('utf-8')
 
 def getSession(id):
