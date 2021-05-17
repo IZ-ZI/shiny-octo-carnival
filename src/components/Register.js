@@ -28,7 +28,7 @@ class Register extends React.Component {
         password: e["pwd-2nd"],
       };
       this.registerReq = reqwest({
-        url: "https://18.221.119.146:8000/oum/argusUtils/signup/",
+        url: "https://3.131.58.107:8000/oum/argusUtils/signup/",
         method: "put",
         type: "json",
         contentType: "application/json",
@@ -140,13 +140,13 @@ class Register extends React.Component {
                     validator(_, value) {
                       let temp = getFieldValue("pwd-1st");
                       if (
-                        !/^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[\w!@#$%^&*]{8,}$/.test(
+                        /^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[\w!@#$%^&*]{8,}$/.test(
                           temp
                         )
                       ) {
-                        return Promise.reject("Password is too Weak!");
+                        return Promise.resolve();
                       }
-                      return Promise.resolve();
+                      return Promise.reject("Password is too Weak!");
                     },
                   }),
                 ]}

@@ -30,7 +30,7 @@ class Profile_Overview extends React.Component {
   requestProfile() {
     this.setState({ refreshing: true });
     this.profileReq = reqwest({
-      url: "https://18.221.119.146:8000/ppm/managedClient/account/argus/",
+      url: "https://3.131.58.107:8000/ppm/managedClient/account/argus/",
       type: "json",
       method: "get",
       headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
@@ -55,7 +55,7 @@ class Profile_Overview extends React.Component {
   }
 
   componentDidMount() {
-    //this.requestProfile();
+    this.requestProfile();
   }
 
   changeAvatar() {
@@ -87,6 +87,12 @@ class Profile_Overview extends React.Component {
   }
 
   confirmLogout() {
+    reqwest({
+      url: "https://3.131.58.107:8000/ppm/managedClient/logout/",
+      type: "json",
+      method: "post",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+    });
     sessionStorage.clear();
     this.props.history.push("/login");
     document.getElementById("particles-js").style.display = "inline";

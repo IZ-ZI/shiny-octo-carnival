@@ -19,7 +19,7 @@ class LostNFound extends React.Component {
     this.formRef.current.resetFields();
 
     this.lostReq = reqwest({
-      url: "https://18.221.119.146:8000/oum/argusUtils/lossnfound/",
+      url: "https://3.131.58.107:8000/oum/argusUtils/lossnfound/",
       method: "post",
       type: "json",
       contentType: "application/json",

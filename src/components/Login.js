@@ -7,7 +7,7 @@ import { Form, Input, Button, Checkbox, message } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 class Login extends React.Component {
-  loginReq;
+  loginRef = React.createRef();
 
   state = {
     signInLoading: false,
@@ -15,27 +15,38 @@ class Login extends React.Component {
 
   componentDidMount() {
     setTimeout(() => window.dispatchEvent(new Event("resize")), 1);
+    if (localStorage.getItem("rememberName")) {
+      this.loginRef.current.setFieldsValue({
+        username: localStorage.getItem("rememberName"),
+        password: localStorage.getItem("rememberPwd"),
+        remember: true,
+      });
+    }
   }
 
+  loginReq;
   onFinish = (e) => {
     this.setState({ signInLoading: true });
-    if (e.remember === true) {
-      window.api.send("save-login", [e.username, e.password]);
-    }
     this.loginReq = reqwest({
-      url: "https://18.221.119.146:8000/oum/argusUtils/login/",
+      url: "https://3.131.58.107:8000/oum/argusUtils/login/",
       method: "post",
       type: "json",
       contentType: "application/json",
       data: JSON.stringify(e),
       success: (res) => {
         this.setState({ signInLoading: false });
+        if (e.remember === true) {
+          localStorage.setItem("rememberName", e.username);
+          localStorage.setItem("rememberPwd", e.password);
+        } else {
+          localStorage.clear();
+        }
         sessionStorage.setItem("sessionKey", res.output["X-API-SESSION"]);
         this.props.history.push("/appcontainer");
       },
       error: () => {
+        localStorage.clear();
         this.setState({ signInLoading: false });
-        this.props.history.push("/appcontainer");
         message.error("Login failed. Please check you credentials.", 3);
       },
     });
@@ -53,6 +64,7 @@ class Login extends React.Component {
         <div id="login">
           <Form
             name="login_form"
+            ref={this.loginRef}
             className="login_form"
             onFinish={this.onFinish}
             initialValues={{ remember: false }}
@@ -103,8 +115,8 @@ class Login extends React.Component {
             </Form.Item>
             <Form.Item className="no-select">
               <Form.Item
-                id="sign-in-remember-flag"
                 name="remember"
+                id="sign-in-remember-flag"
                 valuePropName="checked"
                 noStyle
               >

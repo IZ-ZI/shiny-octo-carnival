@@ -1,23 +1,30 @@
 import G6 from "@antv/g6";
 import "antd/dist/antd.css";
-import { withRouter, useHistory } from "react-router-dom";
+import reqwest from "reqwest";
 import { TweenOneGroup } from "rc-tween-one";
 import { PlusOutlined } from "@ant-design/icons";
+import { withRouter, useHistory } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
-import { PageHeader, Card, Slider, Divider, Skeleton, Tag, Input } from "antd";
+import {
+  Tag,
+  Row,
+  Col,
+  Card,
+  Input,
+  Slider,
+  message,
+  Divider,
+  Skeleton,
+  PageHeader,
+} from "antd";
 const { Util } = G6;
 
-const MindMap = ({ data }) => {
+const MindMap = () => {
   const history = useHistory();
   const inputRef = useRef(null);
-  const [keywords, setKeywords] = useState([
-    "Modeling Method",
-    "Classification",
-    "Regression",
-    "Consensus",
-    "CSDS 395",
-    "Argus",
-  ]);
+  const [mapRef, setMapRef] = useState();
+  const [mapData, setMapData] = useState();
+  const [keywords, setKeywords] = useState([]);
   const [title, setTitle] = useState("Loading...");
   const [newKeyword, setNewKeyword] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -28,146 +35,9 @@ const MindMap = ({ data }) => {
     "sentence-number": 1,
   });
 
-  data = {
-    label: "Modeling Methods",
+  const mockData = {
+    label: "Loading MindMap......",
     id: "0",
-    children: [
-      {
-        label: "Classification",
-        id: "0-1",
-        color: "#5AD8A6",
-        children: [
-          {
-            label: "Logistic regression",
-            id: "0-1-1",
-          },
-          {
-            label: "Linear discriminant analysis",
-            id: "0-1-2",
-          },
-          {
-            label: "Rules",
-            id: "0-1-3",
-          },
-          {
-            label: "Decision trees",
-            id: "0-1-4",
-          },
-          {
-            label: "Naive Bayes",
-            id: "0-1-5",
-          },
-          {
-            label: "K nearest neighbor",
-            id: "0-1-6",
-          },
-          {
-            label: "Probabilistic neural network",
-            id: "0-1-7",
-          },
-          {
-            label: "Support vector machine",
-            id: "0-1-8",
-          },
-        ],
-      },
-      {
-        label: "Consensus",
-        id: "0-2",
-        color: "#F6BD16",
-        children: [
-          {
-            label: "Models diversity",
-            id: "0-2-1",
-            children: [
-              {
-                label: "Different initializations",
-                id: "0-2-1-1",
-              },
-              {
-                label: "Different parameter choices",
-                id: "0-2-1-2",
-              },
-              {
-                label: "Different architectures",
-                id: "0-2-1-3",
-              },
-              {
-                label: "Different modeling methods",
-                id: "0-2-1-4",
-              },
-              {
-                label: "Different training sets",
-                id: "0-2-1-5",
-              },
-              {
-                label: "Different feature sets",
-                id: "0-2-1-6",
-              },
-            ],
-          },
-          {
-            label: "Methods",
-            id: "0-2-2",
-            children: [
-              {
-                label: "Classifier selection",
-                id: "0-2-2-1",
-              },
-              {
-                label: "Classifier fusion",
-                id: "0-2-2-2",
-              },
-            ],
-          },
-          {
-            label: "Common",
-            id: "0-2-3",
-            children: [
-              {
-                label: "Bagging",
-                id: "0-2-3-1",
-              },
-              {
-                label: "Boosting",
-                id: "0-2-3-2",
-              },
-              {
-                label: "AdaBoost",
-                id: "0-2-3-3",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        label: "Regression",
-        id: "0-3",
-        color: "#269A99",
-        children: [
-          {
-            label: "Multiple linear regression",
-            id: "0-3-1",
-          },
-          {
-            label: "Partial least squares",
-            id: "0-3-2",
-          },
-          {
-            label: "Multi-layer feedforward neural network",
-            id: "0-3-3",
-          },
-          {
-            label: "General regression neural network",
-            id: "0-3-4",
-          },
-          {
-            label: "Support vector regression",
-            id: "0-3-5",
-          },
-        ],
-      },
-    ],
   };
 
   G6.registerNode(
@@ -376,9 +246,118 @@ const MindMap = ({ data }) => {
     setNewKeyword("");
   };
 
+  const changeLayerSize = (value) => {
+    setMapConfig({
+      "layer-size": value,
+      "layer-number": mapConfig["layer-number"],
+      "sentence-number": mapConfig["sentence-number"],
+    });
+    //if (changeLayerNumber) {
+    //changeLayerNumber.abort();
+    //}
+    //if (changeSentenceSize) {
+    //changeSentenceSize.abort();
+    //}
+
+    changeLayerSize = reqwest({
+      url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
+      type: "json",
+      method: "POST",
+      data: JSON.stringify({
+        id: sessionStorage.getItem("targetMeetingID"),
+        layerSize: value,
+        layerNumber: mapConfig["layer-number"],
+        sentenceNumber: mapConfig["sentence-number"],
+        keywords: keywords,
+      }),
+      contentType: "application/json",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+      success: (res) => {
+        setMapData(JSON.parse(res.output));
+      },
+      error: () => {
+        message.error("Something went wrong while updating MindMap.");
+      },
+    });
+  };
+
+  const changeLayerNumber = (value) => {
+    setMapConfig({
+      "layer-size": mapConfig["layer-size"],
+      "layer-number": value,
+      "sentence-number": mapConfig["sentence-number"],
+    });
+
+    //if (changeLayerSize) {
+    //changeLayerNumber.abort();
+    //}
+    //if (changeSentenceSize) {
+    //changeSentenceSize.abort();
+    //}
+
+    changeLayerNumber = changeSereqwest({
+      url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
+      type: "json",
+      method: "POST",
+      data: JSON.stringify({
+        id: sessionStorage.getItem("targetMeetingID"),
+        layerSize: mapConfig["layer-size"],
+        layerNumber: value,
+        sentenceNumber: mapConfig["sentence-number"],
+        keywords: keywords,
+      }),
+      contentType: "application/json",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+      success: (res) => {
+        setMapData(JSON.parse(res.output));
+      },
+      error: () => {
+        message.error("Something went wrong while updating MindMap.");
+      },
+    });
+  };
+
+  const changeSentenceSize = (value) => {
+    setMapConfig({
+      "layer-size": mapConfig["layer-size"],
+      "layer-number": mapConfig["layer-number"],
+      "sentence-number": value,
+    });
+
+    //if (changeLayerSize) {
+    //changeLayerNumber.abort();
+    //}
+    //if (changeSentenceSize) {
+    //changeSentenceSize.abort();
+    //}
+
+    changeSentenceNumberReq = reqwest({
+      url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
+      type: "json",
+      method: "POST",
+      data: JSON.stringify({
+        id: sessionStorage.getItem("targetMeetingID"),
+        layerSize: mapConfig["layer-size"],
+        layerNumber: mapConfig["layer-number"],
+        sentenceNumber: value,
+        keywords: keywords,
+      }),
+      contentType: "application/json",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+      success: (res) => {
+        setMapData(JSON.parse(res.output));
+      },
+      error: () => {
+        message.error("Something went wrong while updating MindMap.");
+      },
+    });
+  };
+
   useEffect(() => {
+    const meetingID = sessionStorage.getItem("targetMeetingID");
     const graphContainer = document.getElementById("report-mindmap-container");
-    var mindmap = new G6.TreeGraph({
+
+    let mindmap = new G6.TreeGraph({
       container: "report-mindmap-container",
       width: graphContainer.offsetWidth - 5,
       height: graphContainer.offsetHeight - 5,
@@ -386,19 +365,7 @@ const MindMap = ({ data }) => {
       fitCenter: true,
       fitViewPadding: 32,
       modes: {
-        default: [
-          {
-            type: "collapse-expand",
-            onChange: function onChange(item, collapsed) {
-              var data = item.get("model").data;
-              data.collapsed = collapsed;
-              return true;
-            },
-          },
-          "drag-canvas",
-          "zoom-canvas",
-          "dice-mindmap",
-        ],
+        default: ["drag-canvas", "zoom-canvas", "dice-mindmap"],
       },
       defaultEdge: {
         shape: "cubic-horizontal",
@@ -431,18 +398,77 @@ const MindMap = ({ data }) => {
         },
       },
     });
+    setMapRef(mindmap);
 
-    mindmap.data(dataTransform(data));
+    mindmap.data(dataTransform(mockData));
     mindmap.setMinZoom(0.48);
     mindmap.setMaxZoom(2);
     mindmap.render();
+    //setTimeout(() => mindmap.changeData(dataTransform(mockData2)), 3000);
     window.addEventListener("resize", () =>
       mindmap.changeSize(
         graphContainer.offsetWidth - 5,
         graphContainer.offsetHeight - 5
       )
     );
+
+    let mapReq = reqwest({
+      url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
+      type: "json",
+      method: "POST",
+      data: JSON.stringify({
+        id: meetingID,
+        layerSize: mapConfig["layer-size"],
+        layerNumber: mapConfig["layer-number"],
+        sentenceNumber: mapConfig["sentence-number"],
+        keywords: keywords,
+      }),
+      contentType: "application/json",
+      headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+      success: (res) => {
+        setMapData(JSON.parse(res.output));
+      },
+      error: () => {
+        message.error("Something went wrong while fetching MindMap data.");
+      },
+    });
+
+    return () => {
+      mapReq.abort();
+      sessionStorage.setItem("targetMeetingID", "");
+    };
   }, []);
+
+  useEffect(() => {
+    if (mapData) {
+      mapRef.changeData(dataTransform(mapData), false);
+    }
+  }, [mapData]);
+
+  useEffect(() => {
+    if (keywords.length != 0) {
+      editKeywordsReq = reqwest({
+        url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
+        type: "json",
+        method: "POST",
+        data: JSON.stringify({
+          id: sessionStorage.getItem("targetMeetingID"),
+          layerSize: mapConfig["layer-size"],
+          layerNumber: mapConfig["layer-number"],
+          sentenceNumber: mapConfig["sentence-number"],
+          keywords: keywords,
+        }),
+        contentType: "application/json",
+        headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
+        success: (res) => {
+          setMapData(JSON.parse(res.output));
+        },
+        error: () => {
+          message.error("Something went wrong while updating MindMap.");
+        },
+      });
+    }
+  }, [keywords]);
 
   return (
     <div id="report-container">
@@ -453,62 +479,98 @@ const MindMap = ({ data }) => {
         subTitle="viewing meeting MindMap"
         onBack={() => history.push("/appcontainer/meeting")}
       />
-      <div id="report-mindmap-container"></div>
-      <Card className="no-select" id="report-config-card" title={title}>
-        <Skeleton active={true} loading={loadingConfig}>
-          <p>Layer Size</p>
-          <Slider defaultValue={mapConfig["layer-size"]} min={2} max={5} />
-          <p>Layer Number</p>
-          <Slider defaultValue={mapConfig["layer-number"]} min={2} max={5} />
-          <p>Sentence Number</p>
-          <Slider defaultValue={mapConfig["sentence-number"]} min={1} max={3} />
-        </Skeleton>
-        <Divider />
-        <p>Edit Keywords to Tune the MindMap</p>
-        <TweenOneGroup
-          enter={{
-            scale: 0.8,
-            opacity: 0,
-            type: "from",
-            duration: 100,
-            onComplete: (e) => {
-              e.target.style = "";
-            },
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Row
+          style={{
+            width: "100%",
+            height: "80%",
+            padding: "16px",
           }}
-          leave={{ opacity: 0, width: 0, scale: 0, duration: 200 }}
-          appear={false}
         >
-          {keywords.map(generateTag)}
-        </TweenOneGroup>
-        {isEditing && (
-          <Input
-            ref={inputRef}
-            type="text"
-            size="small"
-            style={{ width: 78, marginTop: "16px" }}
-            value={newKeyword}
-            onChange={onInputChange}
-            onBlur={onInputConfirm}
-            onPressEnter={onInputConfirm}
-          />
-        )}
-        {!isEditing && (
-          <Tag
-            onClick={toggleInput}
-            className="no-select"
-            style={{
-              marginTop: "16px",
-              background: "transparent",
-              borderStyle: "dashed",
-            }}
-          >
-            <PlusOutlined /> New Keyword
-          </Tag>
-        )}
-      </Card>
+          <Col span={18} style={{ height: "100%" }}>
+            <div id="report-mindmap-container"></div>
+          </Col>
+          <Col span={6} style={{ height: "100%" }}>
+            <Card className="no-select" id="report-config-card" title={title}>
+              <Skeleton active={true} loading={loadingConfig}>
+                <p>Layer Size</p>
+                <Slider
+                  defaultValue={mapConfig["layer-size"]}
+                  min={2}
+                  max={5}
+                  onAfterChange={changeLayerSize}
+                />
+                <p>Layer Number</p>
+                <Slider
+                  defaultValue={mapConfig["layer-number"]}
+                  min={2}
+                  max={5}
+                  onAfterChange={changeLayerNumber}
+                />
+                <p>Sentence Number</p>
+                <Slider
+                  defaultValue={mapConfig["sentence-number"]}
+                  min={1}
+                  max={3}
+                  onAfterChange={changeSentenceSize}
+                />
+              </Skeleton>
+              <Divider />
+              <p>Edit Keywords to Tune the MindMap</p>
+              <TweenOneGroup
+                enter={{
+                  scale: 0.8,
+                  opacity: 0,
+                  type: "from",
+                  duration: 100,
+                  onComplete: (e) => {
+                    e.target.style = "";
+                  },
+                }}
+                leave={{ opacity: 0, width: 0, scale: 0, duration: 200 }}
+                appear={false}
+              >
+                {keywords.map(generateTag)}
+              </TweenOneGroup>
+              {isEditing && (
+                <Input
+                  ref={inputRef}
+                  type="text"
+                  size="small"
+                  style={{ width: 78, marginTop: "16px" }}
+                  value={newKeyword}
+                  onChange={onInputChange}
+                  onBlur={onInputConfirm}
+                  onPressEnter={onInputConfirm}
+                />
+              )}
+              {!isEditing && (
+                <Tag
+                  onClick={toggleInput}
+                  className="no-select"
+                  style={{
+                    marginTop: "16px",
+                    background: "transparent",
+                    borderStyle: "dashed",
+                  }}
+                >
+                  <PlusOutlined /> New Keyword
+                </Tag>
+              )}
+            </Card>
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 };
 
-//export default withRouter(MindMap);
-export default MindMap;
+export default withRouter(MindMap);

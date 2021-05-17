@@ -10,7 +10,7 @@ import MeetingList from "./MeetingComponents/MeetingList";
 import CreateMeeting from "./MeetingComponents/CreateMeeting";
 
 const URL =
-  "https://18.221.119.146:8000/ppm/managedClient/account/meetingscheduler/";
+  "https://3.131.58.107:8000/ppm/managedClient/account/meetingscheduler/";
 
 export default class Meeting extends React.Component {
   constructor(props) {

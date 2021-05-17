@@ -61,7 +61,7 @@ const CreateMeeting = (props) => {
     setSubmitting(true);
     createReq = reqwest({
       url:
-        "https://18.221.119.146:8000/ppm/managedClient/account/meetingscheduler/",
+        "https://3.131.58.107:8000/ppm/managedClient/account/meetingscheduler/",
       type: "json",
       method: "post",
       data: JSON.stringify(e),

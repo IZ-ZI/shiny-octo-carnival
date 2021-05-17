@@ -1,5 +1,6 @@
 import React from "react";
 import reqwest from "reqwest";
+import { withRouter } from "react-router-dom";
 
 import "antd/dist/antd.css";
 import { Avatar, Tooltip, List, Tag, Button, message } from "antd";
@@ -15,7 +16,7 @@ import {
 } from "@ant-design/icons";
 
 const URL =
-  "https://18.221.119.146:8000/ppm/managedClient/account/meetingscheduler/";
+  "https://3.131.58.107:8000/ppm/managedClient/account/meetingscheduler/";
 
 class MeetingList extends React.Component {
   meetingsReq;
@@ -23,6 +24,7 @@ class MeetingList extends React.Component {
   constructor(props) {
     super(props);
     this.monitorWindowHeight = this.monitorWindowHeight.bind(this);
+    this.fetchMindmap = this.fetchMindmap.bind(this);
   }
 
   state = {
@@ -51,6 +53,11 @@ class MeetingList extends React.Component {
         message.error("Something went wrong while fetching meetings.");
       },
     });
+  };
+
+  fetchMindmap = (meetingID) => {
+    sessionStorage.setItem("targetMeetingID", meetingID);
+    this.props.history.push("/appcontainer/report");
   };
 
   deleteMeeting = (meetingID) => {
@@ -139,20 +146,26 @@ class MeetingList extends React.Component {
       </Tooltip>,
     ];
 
-    const zoomReport = [
-      <Tooltip
-        placement="leftBottom"
-        title="Coming in Future Update"
-        getPopupContainer={(trigger) => trigger.parentElement}
-      >
-        <Button className="meeting-list-actions" disabled={true} type="link">
-          Delete
-        </Button>
-      </Tooltip>,
-      <Button className="meeting-list-actions" type="link">
-        View
-      </Button>,
-    ];
+    const zoomReport = (key) => {
+      return [
+        <Tooltip
+          placement="leftBottom"
+          title="Coming in Future Update"
+          getPopupContainer={(trigger) => trigger.parentElement}
+        >
+          <Button className="meeting-list-actions" disabled={true} type="link">
+            Delete
+          </Button>
+        </Tooltip>,
+        <Button
+          onClick={() => this.fetchMindmap(key)}
+          className="meeting-list-actions"
+          type="link"
+        >
+          View
+        </Button>,
+      ];
+    };
 
     const offlineGeneral = (key) => {
       return [
@@ -178,14 +191,20 @@ class MeetingList extends React.Component {
       </Button>,
     ];
 
-    const offlineReport = [
-      <Button className="meeting-list-actions" type="link">
-        Delete
-      </Button>,
-      <Button className="meeting-list-actions" type="link">
-        View
-      </Button>,
-    ];
+    const offlineReport = (key) => {
+      return [
+        <Button className="meeting-list-actions" type="link">
+          Delete
+        </Button>,
+        <Button
+          onClick={() => this.fetchMindmap(key)}
+          className="meeting-list-actions"
+          type="link"
+        >
+          View
+        </Button>,
+      ];
+    };
 
     return (
       <List
@@ -198,12 +217,12 @@ class MeetingList extends React.Component {
             actions={
               item.type === 0
                 ? item.status === 3
-                  ? zoomReport
+                  ? zoomReport(item.id)
                   : zoomGeneral
                 : item.status === 0
                 ? offlineGeneral(item.id)
                 : item.status === 3
-                ? offlineReport
+                ? offlineReport(item.id)
                 : offlineDisabled
             }
           >
@@ -237,4 +256,4 @@ class MeetingList extends React.Component {
   }
 }
 
-export default MeetingList;
+export default withRouter(MeetingList);

@@ -22,6 +22,7 @@ import {
 } from "@ant-design/icons";
 
 import reqwest from "reqwest";
+import logo_src from "../imgs/test_cat.jpg";
 import Dashboard_SevenDayGraph from "./DashboardComponents/Dashboard_SevenDayGraph";
 
 class Dashboard extends React.Component {
@@ -32,7 +33,7 @@ class Dashboard extends React.Component {
 
   intervalID = 0;
   bannerReq;
-  avatarReq;
+  //avatarReq;
   graphReq;
 
   state = {
@@ -57,8 +58,7 @@ class Dashboard extends React.Component {
 
   getBannerData() {
     this.bannerReq = reqwest({
-      url:
-        "https://18.221.119.146:8000/ppm/managedClient/account/meetingstats/",
+      url: "https://3.131.58.107:8000/ppm/managedClient/account/meetingstats/",
       type: "json",
       headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
       success: (res) => {
@@ -77,8 +77,7 @@ class Dashboard extends React.Component {
 
   getGraphData() {
     this.graphReq = reqwest({
-      url:
-        "https://18.221.119.146:8000/ppm/managedClient/account/meetinggraph/",
+      url: "https://3.131.58.107:8000/ppm/managedClient/account/meetinggraph/",
       type: "json",
       method: "get",
       headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
@@ -110,21 +109,11 @@ class Dashboard extends React.Component {
     this.getGraphData();
     this.getBannerData();
     this.bindInternetListeners();
-    this.avatarReq = reqwest({
-      url: "https://randomuser.me/api/?result=1&inc=picture",
-      type: "json",
-      method: "get",
-      contentType: "application/json",
-      success: (res) => {
-        this.setState({
-          avatar: res.results[0].picture.thumbnail,
-        });
-      },
-    });
+    //this.avatarReq =  ;
   }
 
   componentWillUnmount() {
-    this.avatarReq.abort();
+    //this.avatarReq.abort();
     this.graphReq.abort();
     clearInterval(this.intervalID);
     this.releaseInternetListeners();
@@ -137,7 +126,7 @@ class Dashboard extends React.Component {
           className="no-select"
           ghost={false}
           title="Flight Control 🚀"
-          avatar={{ src: this.state.avatar, size: "large" }}
+          avatar={{ src: logo_src, size: "large" }}
           tags={
             <Tooltip
               placement="right"

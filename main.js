@@ -17,8 +17,6 @@ if (require("electron-squirrel-startup")) {
 const createWindow = () => {
   // Create the browser window.
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  //adaptive zoom.
-  const factor = screen.getPrimaryDisplay().scaleFactor;
   const mainWindow = new BrowserWindow({
     show: false,
     opacity: 0,
@@ -43,7 +41,6 @@ const createWindow = () => {
   // mainWindow.webContents.openDevTools();
 
   mainWindow.once("ready-to-show", () => {
-    console.log(app.getPath("userData"));
     mainWindow.show();
     let totalSteps = 100.0;
     let totalTime = 500.0;
@@ -115,7 +112,7 @@ ipcMain.on("educate-zoom", () => {
 
 ipcMain.on("connect-zoom", (event, payload) => {
   const oauthURL =
-    "https://zoom.us/oauth/authorize?response_type=code&client_id=ZkN5imdcTRaz0LJJ1dtMhw&redirect_uri=https://18.221.119.146:8000/oum/argusUtils/setup/redirected";
+    "https://zoom.us/oauth/authorize?response_type=code&client_id=ZkN5imdcTRaz0LJJ1dtMhw&redirect_uri=https://3.131.58.107:8000/oum/argusUtils/setup/redirected";
 
   const sizes = BrowserWindow.getFocusedWindow().getSize();
   var authWindow = new BrowserWindow({
@@ -141,8 +138,7 @@ ipcMain.on("connect-zoom", (event, payload) => {
       const req = net.request({
         method: "GET",
         url:
-          "https://18.221.119.146:8000/oum/argusUtils/zoomlinker?code=" +
-          code[1],
+          "https://3.131.58.107:8000/oum/argusUtils/zoomlinker?code=" + code[1],
       });
       req.setHeader("X-API-SESSION", payload);
       req.end();

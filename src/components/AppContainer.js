@@ -138,18 +138,6 @@ class AppContainer extends React.Component {
                   Meetings
                 </span>
               </Menu.Item>
-              <Menu.Item
-                key="4"
-                icon={<FileFilled style={{ fontSize: "125%" }} />}
-                onClick={() => this.navToReport()}
-              >
-                <span
-                  className="no-select"
-                  style={{ fontSize: "1.5em", fontWeight: "bold" }}
-                >
-                  Reports
-                </span>
-              </Menu.Item>
             </Menu>
           </Sider>
           <Layout>

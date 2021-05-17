@@ -2,7 +2,7 @@
   "name": "argus",
   "productName": "Argus",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Hybrid Meeting Manager",
   "main": "main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -22,31 +22,17 @@
     ]
   },
   "keywords": [],
-  "author": "Grace Yu, Randolph Zhao, Yonghao Zhou, Isaac Zhu",
+  "author": "Grace Yu, Randolph Zhao, Yonghao Zhou, Isaac Zhu, Renjie Xi",
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {"asar": true, "icon": "src/icons/logo_size_invert.ico"},
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "395_project"
+
           }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
         }
       ]
     }

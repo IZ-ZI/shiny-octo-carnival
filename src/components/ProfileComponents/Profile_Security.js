@@ -17,7 +17,7 @@ class Profile_Security extends React.Component {
   securityReq;
   requestProfile() {
     this.securityReq = reqwest({
-      url: "https://18.221.119.146:8000/ppm/managedClient/account/argus/",
+      url: "https://3.131.58.107:8000/ppm/managedClient/account/argus/",
       type: "json",
       method: "get",
       headers: { "X-API-SESSION": sessionStorage.getItem("sessionKey") },
@@ -31,7 +31,7 @@ class Profile_Security extends React.Component {
   }
 
   componentDidMount() {
-    //this.requestProfile();
+    this.requestProfile();
   }
 
   componentWillUnmount() {
@@ -58,7 +58,7 @@ class Profile_Security extends React.Component {
     if (e["firstName"] != null || e["lastName"] != null) {
       this.nameReq = reqwest({
         url:
-          "https://18.221.119.146:8000/ppm/managedClient/account/profile/name/",
+          "https://3.131.58.107:8000/ppm/managedClient/account/profile/name/",
         type: "json",
         method: "post",
         data: JSON.stringify(e),
@@ -104,7 +104,7 @@ class Profile_Security extends React.Component {
     if (e["email"] != null) {
       this.emailReq = reqwest({
         url:
-          "https://18.221.119.146:8000/ppm/managedClient/account/profile/email/",
+          "https://3.131.58.107:8000/ppm/managedClient/account/profile/email/",
         type: "json",
         method: "post",
         data: JSON.stringify(e),
@@ -150,10 +150,15 @@ class Profile_Security extends React.Component {
 
   pwdReq;
   toUpdatePassword = (e) => {
-    if (e["password"] != null) {
+    if (
+      e["password"] != null &&
+      /^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[\w!@#$%^&*]{8,}$/.test(
+        e["password"]
+      )
+    ) {
       this.pwdReq = reqwest({
         url:
-          "https://18.221.119.146:8000/ppm/managedClient/account/profile/password/",
+          "https://3.131.58.107:8000/ppm/managedClient/account/profile/password/",
         type: "json",
         method: "post",
         data: JSON.stringify(e),
@@ -168,6 +173,8 @@ class Profile_Security extends React.Component {
           message.error("An error occurred");
         },
       });
+    } else {
+      message.error("Password is too weak.");
     }
   };
 
@@ -198,7 +205,7 @@ class Profile_Security extends React.Component {
     if (e["phone"] != null) {
       this.phoneReq = reqwest({
         url:
-          "https://18.221.119.146:8000/ppm/managedClient/account/profile/phone/",
+          "https://3.131.58.107:8000/ppm/managedClient/account/profile/phone/",
         type: "json",
         method: "post",
         data: JSON.stringify(e),
