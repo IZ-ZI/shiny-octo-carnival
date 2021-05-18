@@ -252,14 +252,8 @@ const MindMap = () => {
       "layer-number": mapConfig["layer-number"],
       "sentence-number": mapConfig["sentence-number"],
     });
-    //if (changeLayerNumber) {
-    //changeLayerNumber.abort();
-    //}
-    //if (changeSentenceSize) {
-    //changeSentenceSize.abort();
-    //}
 
-    changeLayerSize = reqwest({
+    reqwest({
       url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
       type: "json",
       method: "POST",
@@ -288,14 +282,7 @@ const MindMap = () => {
       "sentence-number": mapConfig["sentence-number"],
     });
 
-    //if (changeLayerSize) {
-    //changeLayerNumber.abort();
-    //}
-    //if (changeSentenceSize) {
-    //changeSentenceSize.abort();
-    //}
-
-    changeLayerNumber = changeSereqwest({
+    reqwest({
       url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
       type: "json",
       method: "POST",
@@ -324,14 +311,7 @@ const MindMap = () => {
       "sentence-number": value,
     });
 
-    //if (changeLayerSize) {
-    //changeLayerNumber.abort();
-    //}
-    //if (changeSentenceSize) {
-    //changeSentenceSize.abort();
-    //}
-
-    changeSentenceNumberReq = reqwest({
+    reqwest({
       url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
       type: "json",
       method: "POST",
@@ -354,6 +334,7 @@ const MindMap = () => {
   };
 
   useEffect(() => {
+    setTitle(meetingID);
     const meetingID = sessionStorage.getItem("targetMeetingID");
     const graphContainer = document.getElementById("report-mindmap-container");
 
@@ -404,7 +385,6 @@ const MindMap = () => {
     mindmap.setMinZoom(0.48);
     mindmap.setMaxZoom(2);
     mindmap.render();
-    //setTimeout(() => mindmap.changeData(dataTransform(mockData2)), 3000);
     window.addEventListener("resize", () =>
       mindmap.changeSize(
         graphContainer.offsetWidth - 5,
@@ -446,6 +426,7 @@ const MindMap = () => {
   }, [mapData]);
 
   useEffect(() => {
+    let editKeywordsReq;
     if (keywords.length != 0) {
       editKeywordsReq = reqwest({
         url: "https://3.131.58.107:8000/ppm/managedClient/account/mindmap/",
@@ -468,6 +449,11 @@ const MindMap = () => {
         },
       });
     }
+    return () => {
+      if (editKeywordsReq) {
+        editKeywordsReq.abort();
+      }
+    };
   }, [keywords]);
 
   return (

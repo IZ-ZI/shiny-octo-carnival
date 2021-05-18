@@ -2,7 +2,6 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("api", {
   send: (event, payload) => {
     let whiteListEvents = [
-      "save-login",
       "try-login",
       "educate-zoom",
       "connect-zoom",

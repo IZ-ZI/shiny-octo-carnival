@@ -125,38 +125,36 @@ class MeetingList extends React.Component {
       "Reports Available",
     ];
 
-    const zoomGeneral = [
-      <Tooltip
-        placement="leftBottom"
-        title="Coming in Future Update"
-        getPopupContainer={(trigger) => trigger.parentElement}
-      >
-        <Button className="meeting-list-actions" disabled={true} type="link">
-          Delete
-        </Button>
-      </Tooltip>,
-      <Tooltip
-        placement="leftBottom"
-        title="Coming in Future Update"
-        getPopupContainer={(trigger) => trigger.parentElement}
-      >
-        <Button className="meeting-list-actions" disabled={true} type="link">
-          More
-        </Button>
-      </Tooltip>,
-    ];
-
-    const zoomReport = (key) => {
+    const zoomGeneral = (key) => {
       return [
+        <Button
+          className="meeting-list-actions"
+          onClick={() => this.deleteMeeting(key)}
+          type="link"
+        >
+          Delete
+        </Button>,
         <Tooltip
           placement="leftBottom"
           title="Coming in Future Update"
           getPopupContainer={(trigger) => trigger.parentElement}
         >
           <Button className="meeting-list-actions" disabled={true} type="link">
-            Delete
+            More
           </Button>
         </Tooltip>,
+      ];
+    };
+
+    const zoomReport = (key) => {
+      return [
+        <Button
+          className="meeting-list-actions"
+          onClick={() => this.deleteMeeting(key)}
+          type="link"
+        >
+          Delete
+        </Button>,
         <Button
           onClick={() => this.fetchMindmap(key)}
           className="meeting-list-actions"
@@ -218,7 +216,7 @@ class MeetingList extends React.Component {
               item.type === 0
                 ? item.status === 3
                   ? zoomReport(item.id)
-                  : zoomGeneral
+                  : zoomGeneral(item.id)
                 : item.status === 0
                 ? offlineGeneral(item.id)
                 : item.status === 3

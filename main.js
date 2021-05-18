@@ -1,6 +1,7 @@
 const path = require("path");
 const {
   screen,
+  Menu,
   app,
   BrowserWindow,
   ipcMain,
@@ -32,13 +33,53 @@ const createWindow = () => {
     },
   });
 
+  let menu = Menu.buildFromTemplate([
+    {
+      label: "Argus",
+      submenu: [
+        {
+          label: "Exit",
+          click() {
+            app.quit();
+          },
+        },
+        {
+          label: "Helping children in Uganda",
+          click() {
+            require("electron").shell.openExternal(
+              "https://iccf-holland.org/index.html"
+            );
+          },
+        },
+      ],
+    },
+    {
+      label: "Help",
+      submenu: [
+        {
+          label: "Project Presentation",
+          click() {
+            require("electron").shell.openExternal(
+              "https://github.com/IZ-ZI/Argus-A-Meeting-Management-Application"
+            );
+          },
+        },
+        {
+          label: "Project Repository",
+          click() {
+            require("electron").shell.openExternal(
+              "https://github.com/IZ-ZI/Argus-A-Meeting-Management-Application"
+            );
+          },
+        },
+      ],
+    },
+  ]);
+  Menu.setApplicationMenu(menu);
+
   // and load the index.html of the app.
   mainWindow.loadURL("http://127.0.0.1:8080");
   mainWindow.loadFile("index.html");
-
-  // mainWindow.removeMenu();
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
@@ -77,17 +118,6 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
-});
-
-ipcMain.on("save-login", (event, arg) => {
-  const options = {
-    type: "info",
-    buttons: ["OK"],
-    defaultId: 1,
-    title: "Info",
-    message: "Coming in a future update...",
-  };
-  dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), options);
 });
 
 ipcMain.on("educate-zoom", () => {

@@ -26,12 +26,19 @@
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {"asar": true, "icon": "src/icons/logo_size_invert.ico"},
+      "packagerConfig": {
+        "asar": true,
+        "icon": "src/icons/logo_size_invert.ico"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
           "config": {
-
+            "format": "ULFO"
           }
         }
       ]
@@ -45,7 +52,6 @@
     "antd-password-input-strength": "^1.1.1",
     "date-fns": "^2.21.1",
     "electron-squirrel-startup": "^1.0.0",
-    "electron-store": "^7.0.3",
     "particles.js": "^2.0.0",
     "rc-tween-one": "^2.7.3",
     "react": "^17.0.2",
